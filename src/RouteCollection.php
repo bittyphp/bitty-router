@@ -53,6 +53,8 @@ class RouteCollection implements RouteCollectionInterface
         }
 
         $this->routes[$name] = $route;
+
+        return $route;
     }
 
     /**

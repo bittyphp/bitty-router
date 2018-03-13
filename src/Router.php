@@ -50,7 +50,7 @@ class Router implements RouterInterface
         array $constraints = [],
         $name = null
     ) {
-        $this->routes->add($methods, $path, $callback, $constraints, $name);
+        return $this->routes->add($methods, $path, $callback, $constraints, $name);
     }
 
     /**
