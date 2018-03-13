@@ -22,6 +22,8 @@ interface RouteCollectionInterface
      * @param \Closure|string $callback
      * @param string[] $constraints
      * @param string|null $name
+     *
+     * @return RouteInterface
      */
     public function add(
         $methods,

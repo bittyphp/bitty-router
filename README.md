@@ -141,7 +141,7 @@ class ExampleController
 }
 ```
 
-Now we create a route and point it to the class we made and tell it what method to call. When someone visits the route, the `ExampleController` will be built and then the `test` method will be called. If `ExampleController` is defined in the container, it will be loaded from the container.
+Now we create a route and point it to the class we made and tell it what method to call. When someone visits the route, the `ExampleController` will be built and then the `test` method will be called. If `ExampleController` is defined in the container, it will be loaded from the container. If a container entry isn't found, the class constructor will be passed an instance of `Psr\Container\ContainerInterface`.
 
 ```php
 <?php
@@ -154,7 +154,24 @@ $router = new Router(...);
 $router->add('GET', '/resource/path', ExampleController::class.':test');
 ```
 
-Additionally, if the callback implements the `ContainerAwareInterface`, the container will be set. However, since the class name can be a registered service in the container, you could build the controller using the specific services you need instead of getting access to the whole container.
+When a `Closure` is used instead of a class, the container gets bound to the `$this` variable.
+
+```php
+<?php
+
+use Bitty\Http\Response;
+use Bitty\Router\Router;
+
+$router = new Router(...);
+
+$router->add('GET', '/resource/path', function () {
+    $myService = $this->get('some.container.service');
+
+    // ...
+
+    return new Response(...);
+});
+```
 
 ### Named Routes
 
@@ -193,7 +210,7 @@ There are two ways to fetch a route: 1) You can get the route by name, or 2) You
 
 ### By Name
 
-You can use the `get()` method to fetch any named route. This will return a route object, which you can then modify or use as you desire. However, if the route doesn't exist a `NotFoundException` will be thrown.
+You can use the `get()` method to fetch any named route. This will return a route object, which you can then modify or use as you desire. However, if the route doesn't exist a `Bitty\Router\Exception\NotFoundException` will be thrown.
 
 ```php
 <?php
@@ -211,7 +228,7 @@ $route->setMethods(['GET', 'POST']);
 
 ### By Request
 
-You can use the `find()` method to fetch a route based on a request. This allows you to find both named or unnamed routes. Similar to `get()`, if the route doesn't exist a `Bitty\Http\Exception\NotFoundException` will be thrown. If it finds a route, the route object will be returned.
+You can use the `find()` method to fetch a route based on a request. This allows you to find both named or unnamed routes. Similar to `get()`, if the route doesn't exist a `Bitty\Router\Exception\NotFoundException` will be thrown. If it finds a route, the route object will be returned.
 
 ```php
 <?php
