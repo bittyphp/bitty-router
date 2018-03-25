@@ -81,6 +81,30 @@ class RouteHandlerTest extends TestCase
     /**
      * @dataProvider sampleMethods
      */
+    public function testHandleAddsRouteParamsToRequest($method)
+    {
+        $request  = $this->createRequest();
+        $keyA     = uniqid();
+        $keyB     = uniqid();
+        $valueA   = uniqid();
+        $valueB   = uniqid();
+        $callback = uniqid('callback');
+        $route    = $this->createRoute($callback, [$keyA => $valueA, $keyB => $valueB]);
+        $object   = $this->createMock(InvokableStubInterface::class);
+
+        $this->router->method('find')->willReturn($route);
+        $this->builder->method('build')->willReturn([$object, $method]);
+
+        $request->expects($this->exactly(2))
+            ->method('withAttribute')
+            ->withConsecutive([$keyA, $valueA], [$keyB, $valueB]);
+
+        $this->fixture->handle($request);
+    }
+
+    /**
+     * @dataProvider sampleMethods
+     */
     public function testHandleTriggersCallback($method)
     {
         $request  = $this->createRequest();
@@ -94,7 +118,7 @@ class RouteHandlerTest extends TestCase
 
         $object->expects($this->once())
             ->method($method ?: '__invoke')
-            ->with($request, $params);
+            ->with($request);
 
         $this->fixture->handle($request);
     }
@@ -143,13 +167,16 @@ class RouteHandlerTest extends TestCase
             ['getPath' => $path]
         );
 
-        return $this->createConfiguredMock(
+        $request = $this->createConfiguredMock(
             ServerRequestInterface::class,
             [
                 'getUri' => $uri,
                 'getMethod' => $method,
             ]
         );
+        $request->method('withAttribute')->willReturn($request);
+
+        return $request;
     }
 
     /**
