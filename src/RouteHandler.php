@@ -40,13 +40,17 @@ class RouteHandler implements RequestHandlerInterface
 
         list($controller, $action) = $this->builder->build($callback);
 
+        foreach ($params as $key => $value) {
+            $request = $request->withAttribute($key, $value);
+        }
+
         if (null !== $action) {
             return call_user_func_array(
                 [$controller, $action],
-                [$request, $params]
+                [$request]
             );
         }
 
-        return $controller($request, $params);
+        return $controller($request);
     }
 }
