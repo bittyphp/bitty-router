@@ -2,6 +2,7 @@
 
 namespace Bitty\Tests\Router;
 
+use Bitty\Router\Exception\UriGeneratorException;
 use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteInterface;
 use Bitty\Router\UriGenerator;
@@ -144,5 +145,16 @@ class UriGeneratorTest extends TestCase
                 'expected' => '/'.$domain.'/'.$pathB,
             ],
         ];
+    }
+
+    public function testGenerateThrowsException()
+    {
+        $path  = uniqid('path').'/{param}';
+        $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $path]);
+        $this->routes->method('get')->willReturn($route);
+
+        $this->setExpectedException(UriGeneratorException::class, 'Parameter "param" is required.');
+
+        $this->fixture->generate(uniqid());
     }
 }
