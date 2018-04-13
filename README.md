@@ -293,3 +293,27 @@ $uri = $router->generateUri(
 );
 // Outputs: http://example.com/products/123
 ```
+
+### Route Parameters
+
+If you fail to pass in required route parameters, the `UriGenerator` will throw a `Bitty\Router\Exception\UriGeneratorException` exception. Any extra parameters you
+pass will be added to the query string.
+
+```php
+<?php
+
+use Bitty\Router\Router;
+
+$router = new Router(...);
+
+$router->add(
+    'GET',
+    '/products/{id}',
+    ExampleController::class,
+    ['id' => '\d+'],
+    'view_product'
+);
+
+$uri = $router->generateUri('view_product', ['id' => 123, 'foo' => 'bar']);
+// Outputs: /products/123?foo=bar
+```
