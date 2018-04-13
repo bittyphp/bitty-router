@@ -73,10 +73,6 @@ class UriGenerator implements UriGeneratorInterface
         $matches = [];
         preg_match_all('/\{([\w-]+)\}/', $path, $matches);
 
-        if (count($matches) < 2) {
-            return [];
-        }
-
-        return $matches[1];
+        return count($matches) > 1 ? $matches[1] : [];
     }
 }
