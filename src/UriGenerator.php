@@ -2,6 +2,8 @@
 
 namespace Bitty\Router;
 
+use Bitty\Http\Uri;
+use Bitty\Router\Exception\UriGeneratorException;
 use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\UriGeneratorInterface;
 
@@ -33,19 +35,48 @@ class UriGenerator implements UriGeneratorInterface
     public function generate($name, array $params = [], $type = self::ABSOLUTE_PATH)
     {
         $route = $this->routes->get($name);
+        $path  = $route->getPath();
 
-        // TODO: This should take extra params and add them as a query string
-        // TODO: Probably should blow up if missing required params
+        $requiredParams = $this->getRequiredParams($path);
+        foreach ($requiredParams as $param) {
+            if (!isset($params[$param])) {
+                throw new UriGeneratorException(sprintf('Parameter "%s" is required.', $param));
+            }
 
-        $path = $route->getPath();
-        foreach ($params as $id => $value) {
-            $path = str_replace('{'.$id.'}', (string) $value, $path);
+            $path = str_replace('{'.$param.'}', (string) $params[$param], $path);
+            unset($params[$param]);
         }
 
         if (self::ABSOLUTE_URI === $type) {
-            return $this->domain.'/'.ltrim($path, '/');
+            $uri = new Uri($this->domain.'/'.ltrim($path, '/'));
+        } else {
+            $uri = new Uri($path);
         }
 
-        return $path;
+        $query = [];
+        foreach ($params as $id => $value) {
+            $query[] = urlencode(urldecode($id)).'='.urlencode(urldecode($value));
+        }
+
+        return (string) $uri->withQuery(implode('&', $query));
+    }
+
+    /**
+     * Gets the required parameters needed for the path.
+     *
+     * @param string $path
+     *
+     * @return string[] Array of required parameter names.
+     */
+    protected function getRequiredParams($path)
+    {
+        $matches = [];
+        preg_match_all('/\{([\w-]+)\}/', $path, $matches);
+
+        if (count($matches) < 2) {
+            return [];
+        }
+
+        return $matches[1];
     }
 }
