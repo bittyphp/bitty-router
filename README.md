@@ -106,9 +106,9 @@ $router->add(
     // You can define as many variables as needed.
     '/products/{id}',
 
-    // Our callback can access the variable using the additional $params
-    function (ServerRequestInterface $request, array $params) {
-        return new Response('You requested product '.$params['id']);
+    // Our callback can access the variable from the Request object.
+    function (ServerRequestInterface $request) {
+        return new Response('You requested product '.$request->getAttribute('id'));
     },
 
     // Define the constraints. In this case, only look for digits.
