@@ -106,7 +106,7 @@ $router->add(
     // You can define as many variables as needed.
     '/products/{id}',
 
-    // Our callback can access the variable from the Request object
+    // Our callback can access the variable from the Request object.
     function (ServerRequestInterface $request) {
         return new Response('You requested product '.$request->getAttribute('id'));
     },
