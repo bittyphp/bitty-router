@@ -87,6 +87,14 @@ class UriGeneratorTest extends TestCase
                 'type' => UriGeneratorInterface::ABSOLUTE_PATH,
                 'expected' => $pathA.'/'.$paramA,
             ],
+            'one unknown param' => [
+                'path' => $pathA,
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramA' => $paramA],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'?paramA='.$paramA,
+            ],
             'multiple params' => [
                 'path' => $pathA.'/{paramA}/{paramB}',
                 'domain' => '',
@@ -95,13 +103,29 @@ class UriGeneratorTest extends TestCase
                 'type' => UriGeneratorInterface::ABSOLUTE_PATH,
                 'expected' => $pathA.'/'.$paramA.'/'.$paramB,
             ],
+            'multiple unknown params' => [
+                'path' => $pathA,
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramA' => $paramA, 'paramB' => $paramB],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'?paramA='.$paramA.'&paramB='.$paramB,
+            ],
+            'mixed params' => [
+                'path' => $pathA.'/{paramA}',
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramA' => $paramA, 'paramB' => $paramB],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'/'.$paramA.'?paramB='.$paramB,
+            ],
             'domain with trailing slash' => [
                 'path' => $pathB,
                 'domain' => $domain.'/',
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => $domain.'/'.$pathB,
+                'expected' => '/'.$domain.'/'.$pathB,
             ],
             'path with leading slash' => [
                 'path' => $pathA,
@@ -109,7 +133,7 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => $domain.$pathA,
+                'expected' => '/'.$domain.$pathA,
             ],
             'no slashes' => [
                 'path' => $pathB,
@@ -117,7 +141,7 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => $domain.'/'.$pathB,
+                'expected' => '/'.$domain.'/'.$pathB,
             ],
         ];
     }
