@@ -7,7 +7,7 @@ use Bitty\Router\Route;
 use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteMatcher;
 use Bitty\Router\RouteMatcherInterface;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -152,7 +152,8 @@ class RouteMatcherTest extends TestCase
         $this->routes->method('all')->willReturn([]);
 
         $message = 'Route not found';
-        $this->setExpectedException(NotFoundException::class, $message);
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->match($request);
     }

@@ -8,7 +8,7 @@ use Bitty\Router\RouteMatcherInterface;
 use Bitty\Router\Router;
 use Bitty\Router\RouterInterface;
 use Bitty\Router\UriGeneratorInterface;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
 class RouterTest extends TestCase

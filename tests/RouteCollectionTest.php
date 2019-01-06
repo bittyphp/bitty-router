@@ -6,7 +6,7 @@ use Bitty\Router\Exception\NotFoundException;
 use Bitty\Router\RouteCollection;
 use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteInterface;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class RouteCollectionTest extends TestCase
 {
@@ -89,7 +89,8 @@ class RouteCollectionTest extends TestCase
     public function testAddInvalidCallbackThrowsException()
     {
         $message = 'Callback must be a callable or string; NULL given.';
-        $this->setExpectedException(\InvalidArgumentException::class, $message);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->add(uniqid(), uniqid(), null);
     }
@@ -128,7 +129,8 @@ class RouteCollectionTest extends TestCase
         $name = uniqid();
 
         $message = 'No route named "'.$name.'" exists.';
-        $this->setExpectedException(NotFoundException::class, $message);
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->get($name);
     }

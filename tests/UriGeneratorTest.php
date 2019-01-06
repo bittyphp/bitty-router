@@ -7,7 +7,7 @@ use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteInterface;
 use Bitty\Router\UriGenerator;
 use Bitty\Router\UriGeneratorInterface;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class UriGeneratorTest extends TestCase
 {
@@ -38,7 +38,7 @@ class UriGeneratorTest extends TestCase
     public function testGenerateGetsRoute()
     {
         $name  = uniqid();
-        $route = $this->createMock(RouteInterface::class);
+        $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => '']);
 
         $this->routes->expects($this->once())
             ->method('get')
@@ -153,7 +153,8 @@ class UriGeneratorTest extends TestCase
         $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $path]);
         $this->routes->method('get')->willReturn($route);
 
-        $this->setExpectedException(UriGeneratorException::class, 'Parameter "param" is required.');
+        $this->expectException(UriGeneratorException::class);
+        $this->expectExceptionMessage('Parameter "param" is required.');
 
         $this->fixture->generate(uniqid());
     }

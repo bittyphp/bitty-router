@@ -5,7 +5,7 @@ namespace Bitty\Tests\Router;
 use Bitty\Router\CallbackBuilder;
 use Bitty\Router\CallbackBuilderInterface;
 use Bitty\Router\Exception\RouterException;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 class CallbackBuilderTest extends TestCase
@@ -104,7 +104,8 @@ class CallbackBuilderTest extends TestCase
     public function testInvalidCallbackThrowsException($invalid, $expected)
     {
         $message = 'Callback must be a string or instance of \Closure; '.$expected.' given.';
-        $this->setExpectedException(RouterException::class, $message);
+        $this->expectException(RouterException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->build($invalid);
     }
@@ -123,7 +124,8 @@ class CallbackBuilderTest extends TestCase
         $callback = uniqid().':'.uniqid().':'.uniqid();
 
         $message = 'Callback "'.$callback.'" is malformed.';
-        $this->setExpectedException(RouterException::class, $message);
+        $this->expectException(RouterException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->build($callback);
     }
