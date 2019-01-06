@@ -318,3 +318,36 @@ $router->add(
 $uri = $router->generateUri('view_product', ['id' => 123, 'foo' => 'bar']);
 // Outputs: /products/123?foo=bar
 ```
+
+## Using as Middleware
+
+The middleware layer is made of two parts: the route handler and the middleware wrapper.
+
+### Route Handler
+
+The `RouteHandler` is responsible for determining which action to take for a desired route and returning the response from that action. It can be passed into any service that accepts `Psr\Http\Server\RequestHandlerInterface`.
+
+### Routing Middleware
+
+The router can be set up as a PSR middleware component to handle HTTP requests. The middleware object can be passed into anything that accepts `Psr\Http\Server\MiddlewareInterface`.
+
+```php
+<?php
+
+use Bitty\Router\CallbackBuilder;
+use Bitty\Router\RouteHandler;
+use Bitty\Router\Router;
+use Bitty\Router\RoutingMiddleware;
+use Psr\Container\ContainerInterface;
+
+/** @var ContainerInterface */
+$container = ...;
+
+$middleware = new RoutingMiddleware(
+    new RouteHandler(
+        new Router(...),
+        new CallbackBuilder($container)
+    )
+);
+
+```
