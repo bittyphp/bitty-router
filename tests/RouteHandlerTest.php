@@ -49,7 +49,6 @@ class RouteHandlerTest extends TestCase
     public function testHandleCallsRouter(): void
     {
         $request  = $this->createRequest();
-        $response = $this->createResponse();
         $route    = $this->createRoute();
         $callback = function () {
             return $this->createResponse();
