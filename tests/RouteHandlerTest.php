@@ -2,16 +2,17 @@
 
 namespace Bitty\Tests\Router;
 
-use Bitty\Middleware\RequestHandlerInterface;
 use Bitty\Router\CallbackBuilderInterface;
 use Bitty\Router\RouteHandler;
 use Bitty\Router\RouteInterface;
 use Bitty\Router\RouterInterface;
-use Bitty\Tests\Router\TestCase;
 use Bitty\Tests\Router\Stubs\InvokableStubInterface;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class RouteHandlerTest extends TestCase
 {
@@ -21,16 +22,16 @@ class RouteHandlerTest extends TestCase
     protected $fixture = null;
 
     /**
-     * @var RouterInterface
+     * @var RouterInterface|MockObject
      */
     protected $router = null;
 
     /**
-     * @var CallbackBuilderInterface
+     * @var CallbackBuilderInterface|MockObject
      */
     protected $builder = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -40,21 +41,22 @@ class RouteHandlerTest extends TestCase
         $this->fixture = new RouteHandler($this->router, $this->builder);
     }
 
-    public function testInstanceOf()
+    public function testInstanceOf(): void
     {
-        $this->assertInstanceOf(RequestHandlerInterface::class, $this->fixture);
+        self::assertInstanceOf(RequestHandlerInterface::class, $this->fixture);
     }
 
-    public function testHandleCallsRouter()
+    public function testHandleCallsRouter(): void
     {
         $request  = $this->createRequest();
         $route    = $this->createRoute();
         $callback = function () {
+            return $this->createResponse();
         };
 
         $this->builder->method('build')->willReturn([$callback, null]);
 
-        $this->router->expects($this->once())
+        $this->router->expects(self::once())
             ->method('find')
             ->with($request)
             ->willReturn($route);
@@ -62,28 +64,35 @@ class RouteHandlerTest extends TestCase
         $this->fixture->handle($request);
     }
 
-    public function testHandleCallsBuilder()
+    public function testHandleCallsBuilder(): void
     {
         $request  = $this->createRequest();
+        $response = $this->createResponse();
         $callback = uniqid('callback');
         $route    = $this->createRoute($callback);
 
         $this->router->method('find')->willReturn($route);
 
-        $this->builder->expects($this->once())
+        $object = $this->createMock(InvokableStubInterface::class);
+        $object->method('__invoke')->willReturn($response);
+
+        $this->builder->expects(self::once())
             ->method('build')
             ->with($callback)
-            ->willReturn([$this->createMock(InvokableStubInterface::class), null]);
+            ->willReturn([$object, null]);
 
         $this->fixture->handle($request);
     }
 
     /**
+     * @param string|null $method
+     *
      * @dataProvider sampleMethods
      */
-    public function testHandleAddsRouteParamsToRequest($method)
+    public function testHandleAddsRouteParamsToRequest(?string $method): void
     {
         $request  = $this->createRequest();
+        $response = $this->createResponse();
         $keyA     = uniqid();
         $keyB     = uniqid();
         $valueA   = uniqid();
@@ -92,10 +101,11 @@ class RouteHandlerTest extends TestCase
         $route    = $this->createRoute($callback, [$keyA => $valueA, $keyB => $valueB]);
         $object   = $this->createMock(InvokableStubInterface::class);
 
+        $object->method('__invoke')->willReturn($response);
         $this->router->method('find')->willReturn($route);
         $this->builder->method('build')->willReturn([$object, $method]);
 
-        $request->expects($this->exactly(2))
+        $request->expects(self::exactly(2))
             ->method('withAttribute')
             ->withConsecutive([$keyA, $valueA], [$keyB, $valueB]);
 
@@ -103,11 +113,14 @@ class RouteHandlerTest extends TestCase
     }
 
     /**
+     * @param string|null $method
+     *
      * @dataProvider sampleMethods
      */
-    public function testHandleTriggersCallback($method)
+    public function testHandleTriggersCallback(?string $method): void
     {
         $request  = $this->createRequest();
+        $response = $this->createResponse();
         $params   = [uniqid(), uniqid()];
         $callback = uniqid('callback');
         $route    = $this->createRoute($callback, $params);
@@ -116,17 +129,20 @@ class RouteHandlerTest extends TestCase
         $this->router->method('find')->willReturn($route);
         $this->builder->method('build')->willReturn([$object, $method]);
 
-        $object->expects($this->once())
+        $object->expects(self::once())
             ->method($method ?: '__invoke')
-            ->with($request);
+            ->with($request)
+            ->willReturn($response);
 
         $this->fixture->handle($request);
     }
 
     /**
+     * @param string|null $method
+     *
      * @dataProvider sampleMethods
      */
-    public function testHandleReturnsCallbackResponse($method)
+    public function testHandleReturnsCallbackResponse(?string $method): void
     {
         $request  = $this->createRequest();
         $params   = [uniqid(), uniqid()];
@@ -141,10 +157,10 @@ class RouteHandlerTest extends TestCase
 
         $actual = $this->fixture->handle($request);
 
-        $this->assertSame($response, $actual);
+        self::assertSame($response, $actual);
     }
 
-    public function sampleMethods()
+    public function sampleMethods(): array
     {
         return [
             [null],
@@ -158,9 +174,9 @@ class RouteHandlerTest extends TestCase
      * @param string $path
      * @param string $method
      *
-     * @return ServerRequestInterface
+     * @return ServerRequestInterface|MockObject
      */
-    protected function createRequest($path = '', $method = 'GET')
+    protected function createRequest($path = '', $method = 'GET'): ServerRequestInterface
     {
         $uri = $this->createConfiguredMock(
             UriInterface::class,
@@ -180,14 +196,22 @@ class RouteHandlerTest extends TestCase
     }
 
     /**
+     * @return ResponseInterface|MockObject
+     */
+    protected function createResponse(): ResponseInterface
+    {
+        return $this->createMock(ResponseInterface::class);
+    }
+
+    /**
      * Creates a route.
      *
-     * @param callback|null $callback
+     * @param callable|string|null $callback
      * @param array $params
      *
-     * @return RouteInterface
+     * @return RouteInterface|MockObject
      */
-    protected function createRoute($callback = null, array $params = [])
+    protected function createRoute($callback = null, array $params = []): RouteInterface
     {
         return $this->createConfiguredMock(
             RouteInterface::class,

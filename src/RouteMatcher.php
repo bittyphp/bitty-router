@@ -26,7 +26,7 @@ class RouteMatcher implements RouteMatcherInterface
     /**
      * {@inheritDoc}
      */
-    public function match(ServerRequestInterface $request)
+    public function match(ServerRequestInterface $request): RouteInterface
     {
         $method = $request->getMethod();
         $path   = '/'.ltrim($request->getUri()->getPath(), '/');
@@ -52,7 +52,7 @@ class RouteMatcher implements RouteMatcherInterface
      *
      * @return bool
      */
-    protected function isMethodMatch(RouteInterface $route, $method)
+    protected function isMethodMatch(RouteInterface $route, string $method): bool
     {
         $methods = $route->getMethods();
         if ([] === $methods) {
@@ -60,7 +60,7 @@ class RouteMatcher implements RouteMatcherInterface
             return true;
         }
 
-        return in_array($method, $methods);
+        return in_array($method, $methods, true);
     }
 
     /**
@@ -71,7 +71,7 @@ class RouteMatcher implements RouteMatcherInterface
      *
      * @return bool
      */
-    protected function isPathMatch(RouteInterface $route, $path)
+    protected function isPathMatch(RouteInterface $route, string $path): bool
     {
         $pattern = $route->getPattern();
         $matches = [];
@@ -86,7 +86,9 @@ class RouteMatcher implements RouteMatcherInterface
             }
         }
 
-        $route->setParams($params);
+        if (method_exists($route, 'setParams')) {
+            $route->setParams($params);
+        }
 
         return true;
     }

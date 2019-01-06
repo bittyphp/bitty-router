@@ -2,10 +2,11 @@
 
 namespace Bitty\Router;
 
-use Bitty\Middleware\RequestHandlerInterface;
 use Bitty\Router\CallbackBuilderInterface;
 use Bitty\Router\RouterInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class RouteHandler implements RequestHandlerInterface
 {
@@ -32,7 +33,7 @@ class RouteHandler implements RequestHandlerInterface
     /**
      * {@inheritDoc}
      */
-    public function handle(ServerRequestInterface $request)
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $route    = $this->router->find($request);
         $callback = $route->getCallback();
@@ -45,10 +46,12 @@ class RouteHandler implements RequestHandlerInterface
         }
 
         if (null !== $action) {
-            return call_user_func_array(
-                [$controller, $action],
-                [$request]
-            );
+            /**
+             * @var callable
+             */
+            $callable = [$controller, $action];
+
+            return call_user_func_array($callable, [$request]);
         }
 
         return $controller($request);

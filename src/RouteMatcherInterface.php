@@ -17,5 +17,5 @@ interface RouteMatcherInterface
      *
      * @throws NotFoundException When no match found.
      */
-    public function match(ServerRequestInterface $request);
+    public function match(ServerRequestInterface $request): RouteInterface;
 }

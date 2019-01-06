@@ -7,7 +7,8 @@ use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteInterface;
 use Bitty\Router\UriGenerator;
 use Bitty\Router\UriGeneratorInterface;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 class UriGeneratorTest extends TestCase
 {
@@ -17,11 +18,11 @@ class UriGeneratorTest extends TestCase
     protected $fixture = null;
 
     /**
-     * @var RouteCollectionInterface
+     * @var RouteCollectionInterface|MockObject
      */
     protected $routes = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -30,17 +31,17 @@ class UriGeneratorTest extends TestCase
         $this->fixture = new UriGenerator($this->routes);
     }
 
-    public function testInstanceOf()
+    public function testInstanceOf(): void
     {
-        $this->assertInstanceOf(UriGeneratorInterface::class, $this->fixture);
+        self::assertInstanceOf(UriGeneratorInterface::class, $this->fixture);
     }
 
-    public function testGenerateGetsRoute()
+    public function testGenerateGetsRoute(): void
     {
         $name  = uniqid();
-        $route = $this->createMock(RouteInterface::class);
+        $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => '']);
 
-        $this->routes->expects($this->once())
+        $this->routes->expects(self::once())
             ->method('get')
             ->with($name)
             ->willReturn($route);
@@ -49,20 +50,33 @@ class UriGeneratorTest extends TestCase
     }
 
     /**
+     * @param string $path
+     * @param string $domain
+     * @param string $name
+     * @param array $params
+     * @param string $type
+     * @param string $expected
+     *
      * @dataProvider sampleGenerate
      */
-    public function testGenerate($path, $domain, $name, $params, $type, $expected)
-    {
+    public function testGenerate(
+        string $path,
+        string $domain,
+        string $name,
+        array $params,
+        string $type,
+        string $expected
+    ): void {
         $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $path]);
         $this->routes->method('get')->willReturn($route);
 
         $fixture = new UriGenerator($this->routes, $domain);
         $actual  = $fixture->generate($name, $params, $type);
 
-        $this->assertEquals($expected, $actual);
+        self::assertEquals($expected, $actual);
     }
 
-    public function sampleGenerate()
+    public function sampleGenerate(): array
     {
         $name   = uniqid('name');
         $pathA  = '/'.uniqid('path');
@@ -147,13 +161,14 @@ class UriGeneratorTest extends TestCase
         ];
     }
 
-    public function testGenerateThrowsException()
+    public function testGenerateThrowsException(): void
     {
         $path  = uniqid('path').'/{param}';
         $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $path]);
         $this->routes->method('get')->willReturn($route);
 
-        $this->setExpectedException(UriGeneratorException::class, 'Parameter "param" is required.');
+        $this->expectException(UriGeneratorException::class);
+        $this->expectExceptionMessage('Parameter "param" is required.');
 
         $this->fixture->generate(uniqid());
     }

@@ -5,7 +5,8 @@ namespace Bitty\Tests\Router;
 use Bitty\Router\CallbackBuilder;
 use Bitty\Router\CallbackBuilderInterface;
 use Bitty\Router\Exception\RouterException;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 class CallbackBuilderTest extends TestCase
@@ -16,11 +17,11 @@ class CallbackBuilderTest extends TestCase
     protected $fixture = null;
 
     /**
-     * @var ContainerInterface
+     * @var ContainerInterface|MockObject
      */
     protected $container = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -29,32 +30,35 @@ class CallbackBuilderTest extends TestCase
         $this->fixture = new CallbackBuilder($this->container);
     }
 
-    public function testInstanceOf()
+    public function testInstanceOf(): void
     {
-        $this->assertInstanceOf(CallbackBuilderInterface::class, $this->fixture);
+        self::assertInstanceOf(CallbackBuilderInterface::class, $this->fixture);
     }
 
-    public function testBuildSetsContainerOnClosure()
+    public function testBuildSetsContainerOnClosure(): void
     {
         $callback = function () {
             if (!$this instanceof ContainerInterface) {
-                $this->fail('Container not set');
+                self::fail('Container not set');
             }
         };
 
         $actual = $this->fixture->build($callback);
 
-        $this->assertNotSame($callback, $actual[0]);
-        $this->assertNull($actual[1]);
-        $this->assertNull($actual[0]());
+        self::assertNotSame($callback, $actual[0]);
+        self::assertNull($actual[1]);
+        self::assertNull($actual[0]());
     }
 
     /**
+     * @param string $callback
+     * @param string $class
+     *
      * @dataProvider sampleCallbacks
      */
-    public function testBuildChecksContainer($callback, $class)
+    public function testBuildChecksContainer(string $callback, string $class): void
     {
-        $this->container->expects($this->once())
+        $this->container->expects(self::once())
             ->method('has')
             ->with($class)
             ->willReturn(false);
@@ -62,14 +66,14 @@ class CallbackBuilderTest extends TestCase
         $this->fixture->build($callback);
     }
 
-    public function testBuildGetsFromContainer()
+    public function testBuildGetsFromContainer(): void
     {
         $callback = \stdClass::class;
         $object   = $this->createMock($callback);
 
         $this->container->method('has')->willReturn(true);
 
-        $this->container->expects($this->once())
+        $this->container->expects(self::once())
             ->method('get')
             ->with($callback)
             ->willReturn($object);
@@ -78,17 +82,24 @@ class CallbackBuilderTest extends TestCase
     }
 
     /**
+     * @param string $callback
+     * @param string $class
+     * @param string|null $method
+     *
      * @dataProvider sampleCallbacks
      */
-    public function testBuildInvokable($callback, $class, $method)
-    {
+    public function testBuildInvokable(
+        string $callback,
+        string $class,
+        ?string $method
+    ): void {
         $actual = $this->fixture->build($callback);
 
-        $this->assertInstanceOf($class, $actual[0]);
-        $this->assertEquals($method, $actual[1]);
+        self::assertInstanceOf($class, $actual[0]);
+        self::assertEquals($method, $actual[1]);
     }
 
-    public function sampleCallbacks()
+    public function sampleCallbacks(): array
     {
         $method = uniqid('method');
 
@@ -99,17 +110,21 @@ class CallbackBuilderTest extends TestCase
     }
 
     /**
+     * @param mixed $invalid
+     * @param string $expected
+     *
      * @dataProvider sampleInvalidCallbacks
      */
-    public function testInvalidCallbackThrowsException($invalid, $expected)
+    public function testInvalidCallbackThrowsException($invalid, string $expected): void
     {
         $message = 'Callback must be a string or instance of \Closure; '.$expected.' given.';
-        $this->setExpectedException(RouterException::class, $message);
+        $this->expectException(RouterException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->build($invalid);
     }
 
-    public function sampleInvalidCallbacks()
+    public function sampleInvalidCallbacks(): array
     {
         return [
             [null, 'NULL'],
@@ -118,12 +133,13 @@ class CallbackBuilderTest extends TestCase
         ];
     }
 
-    public function testMalformedCallbackThrowsException()
+    public function testMalformedCallbackThrowsException(): void
     {
         $callback = uniqid().':'.uniqid().':'.uniqid();
 
         $message = 'Callback "'.$callback.'" is malformed.';
-        $this->setExpectedException(RouterException::class, $message);
+        $this->expectException(RouterException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->build($callback);
     }

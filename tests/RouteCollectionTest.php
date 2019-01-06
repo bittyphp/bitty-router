@@ -6,7 +6,7 @@ use Bitty\Router\Exception\NotFoundException;
 use Bitty\Router\RouteCollection;
 use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteInterface;
-use Bitty\Tests\Router\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class RouteCollectionTest extends TestCase
 {
@@ -15,19 +15,19 @@ class RouteCollectionTest extends TestCase
      */
     protected $fixture = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->fixture = new RouteCollection();
     }
 
-    public function testInstanceOf()
+    public function testInstanceOf(): void
     {
-        $this->assertInstanceOf(RouteCollectionInterface::class, $this->fixture);
+        self::assertInstanceOf(RouteCollectionInterface::class, $this->fixture);
     }
 
-    public function testAdd()
+    public function testAdd(): void
     {
         $methods     = ['get', 'pOsT'];
         $path        = uniqid();
@@ -40,16 +40,16 @@ class RouteCollectionTest extends TestCase
 
         $actual = $this->fixture->get($name);
 
-        $this->assertInstanceOf(RouteInterface::class, $actual);
-        $this->assertEquals(['GET', 'POST'], $actual->getMethods());
-        $this->assertEquals($path, $actual->getPath());
-        $this->assertEquals($callback, $actual->getCallback());
-        $this->assertEquals($constraints, $actual->getConstraints());
-        $this->assertEquals($name, $actual->getName());
-        $this->assertEquals('route_0', $actual->getIdentifier());
+        self::assertInstanceOf(RouteInterface::class, $actual);
+        self::assertEquals(['GET', 'POST'], $actual->getMethods());
+        self::assertEquals($path, $actual->getPath());
+        self::assertEquals($callback, $actual->getCallback());
+        self::assertEquals($constraints, $actual->getConstraints());
+        self::assertEquals($name, $actual->getName());
+        self::assertEquals('route_0', $actual->getIdentifier());
     }
 
-    public function testAddWithStringCallback()
+    public function testAddWithStringCallback(): void
     {
         $callback = uniqid();
 
@@ -57,21 +57,21 @@ class RouteCollectionTest extends TestCase
 
         $actual = $this->fixture->get('route_0');
 
-        $this->assertEquals($callback, $actual->getCallback());
+        self::assertEquals($callback, $actual->getCallback());
     }
 
-    public function testAddWithoutNameUsesIdentifier()
+    public function testAddWithoutNameUsesIdentifier(): void
     {
         $this->fixture->add(uniqid(), uniqid(), uniqid());
 
         $actual = $this->fixture->get('route_0');
 
-        $this->assertInstanceOf(RouteInterface::class, $actual);
-        $this->assertNull($actual->getName());
-        $this->assertEquals('route_0', $actual->getIdentifier());
+        self::assertInstanceOf(RouteInterface::class, $actual);
+        self::assertNull($actual->getName());
+        self::assertEquals('route_0', $actual->getIdentifier());
     }
 
-    public function testMultipleAddsIncrementsIdentifier()
+    public function testMultipleAddsIncrementsIdentifier(): void
     {
         $nameA = uniqid();
         $nameB = uniqid();
@@ -82,19 +82,20 @@ class RouteCollectionTest extends TestCase
         $actualA = $this->fixture->get($nameA);
         $actualB = $this->fixture->get($nameB);
 
-        $this->assertEquals('route_0', $actualA->getIdentifier());
-        $this->assertEquals('route_1', $actualB->getIdentifier());
+        self::assertEquals('route_0', $actualA->getIdentifier());
+        self::assertEquals('route_1', $actualB->getIdentifier());
     }
 
-    public function testAddInvalidCallbackThrowsException()
+    public function testAddInvalidCallbackThrowsException(): void
     {
         $message = 'Callback must be a callable or string; NULL given.';
-        $this->setExpectedException(\InvalidArgumentException::class, $message);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->add(uniqid(), uniqid(), null);
     }
 
-    public function testAll()
+    public function testAll(): void
     {
         $name = uniqid('name');
 
@@ -102,10 +103,10 @@ class RouteCollectionTest extends TestCase
 
         $actual = $this->fixture->all();
 
-        $this->assertEquals([$name], array_keys($actual));
+        self::assertEquals([$name], array_keys($actual));
     }
 
-    public function testHasTrue()
+    public function testHasTrue(): void
     {
         $name = uniqid('name');
 
@@ -113,27 +114,28 @@ class RouteCollectionTest extends TestCase
 
         $actual = $this->fixture->has($name);
 
-        $this->assertTrue($actual);
+        self::assertTrue($actual);
     }
 
-    public function testHasFalse()
+    public function testHasFalse(): void
     {
         $actual = $this->fixture->has(uniqid());
 
-        $this->assertFalse($actual);
+        self::assertFalse($actual);
     }
 
-    public function testGetThrowsException()
+    public function testGetThrowsException(): void
     {
         $name = uniqid();
 
         $message = 'No route named "'.$name.'" exists.';
-        $this->setExpectedException(NotFoundException::class, $message);
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->get($name);
     }
 
-    public function testRemoveExistingRoute()
+    public function testRemoveExistingRoute(): void
     {
         $name = uniqid('name');
 
@@ -142,10 +144,10 @@ class RouteCollectionTest extends TestCase
 
         $actual = $this->fixture->has($name);
 
-        $this->assertFalse($actual);
+        self::assertFalse($actual);
     }
 
-    public function testRemoveNonExistingRoute()
+    public function testRemoveNonExistingRoute(): void
     {
         $name = uniqid('name');
 
@@ -153,6 +155,6 @@ class RouteCollectionTest extends TestCase
 
         $actual = $this->fixture->has($name);
 
-        $this->assertFalse($actual);
+        self::assertFalse($actual);
     }
 }

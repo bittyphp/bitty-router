@@ -24,11 +24,11 @@ interface CallbackBuilderInterface
      * If using a class name, it will still check to see if the container knows
      * how to build it. Otherwise it only passes the container to the constructor.
      *
-     * @param \Closure|string $callback
+     * @param callable|string $callback
      *
      * @return mixed[]
      *
      * @throws RouterException If unable to build the callback.
      */
-    public function build($callback);
+    public function build($callback): array;
 }

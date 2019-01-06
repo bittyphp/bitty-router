@@ -5,7 +5,7 @@
 [![Total Downloads](https://poser.pugx.org/bittyphp/bitty-router/downloads)](https://packagist.org/packages/bittyphp/bitty-router)
 [![License](https://poser.pugx.org/bittyphp/bitty-router/license)](https://packagist.org/packages/bittyphp/bitty-router)
 
-Bitty's router supports [PSR-7](http://www.php-fig.org/psr/psr-7/) HTTP message interfaces. When a route is called, it is passed an instance of `Psr\Http\Message\ServerRequestInterface` and must return an instance of `Psr\Http\Message\ResponseInterface`.
+Bitty's router is a [PSR-15](https://www.php-fig.org/psr/psr-15/) middleware component and supports [PSR-7](http://www.php-fig.org/psr/psr-7/) HTTP message interfaces. When a route is called, it is passed an instance of `Psr\Http\Message\ServerRequestInterface` and must return an instance of `Psr\Http\Message\ResponseInterface`.
 
 ## Installation
 
@@ -130,11 +130,12 @@ Lets create a route that triggers an action in a controller class. First, we mak
 namespace Acme\Controller;
 
 use Bitty\Http\Response;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class ExampleController
 {
-    public function test(ServerRequestInterface $request)
+    public function test(ServerRequestInterface $request): ResponseInterface
     {
         return new Response('Hey, the controller worked!');
     }

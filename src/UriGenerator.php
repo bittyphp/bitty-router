@@ -23,7 +23,7 @@ class UriGenerator implements UriGeneratorInterface
      * @param RouteCollectionInterface $routes
      * @param string $domain
      */
-    public function __construct(RouteCollectionInterface $routes, $domain = '')
+    public function __construct(RouteCollectionInterface $routes, string $domain = '')
     {
         $this->routes = $routes;
         $this->domain = rtrim($domain, '/');
@@ -32,8 +32,11 @@ class UriGenerator implements UriGeneratorInterface
     /**
      * {@inheritDoc}
      */
-    public function generate($name, array $params = [], $type = self::ABSOLUTE_PATH)
-    {
+    public function generate(
+        string $name,
+        array $params = [],
+        string $type = self::ABSOLUTE_PATH
+    ): string {
         $route = $this->routes->get($name);
         $path  = $route->getPath();
 
@@ -55,7 +58,8 @@ class UriGenerator implements UriGeneratorInterface
 
         $query = [];
         foreach ($params as $id => $value) {
-            $query[] = urlencode(urldecode($id)).'='.urlencode(urldecode($value));
+            $query[] = urlencode(urldecode((string) $id))
+                .'='.urlencode(urldecode((string) $value));
         }
 
         return (string) $uri->withQuery(implode('&', $query));
@@ -68,7 +72,7 @@ class UriGenerator implements UriGeneratorInterface
      *
      * @return string[] Array of required parameter names.
      */
-    protected function getRequiredParams($path)
+    protected function getRequiredParams(string $path): array
     {
         $matches = [];
         preg_match_all('/\{([\w-]+)\}/', $path, $matches);

@@ -9,26 +9,26 @@ interface RouteInterface
      *
      * @return string
      */
-    public function getIdentifier();
+    public function getIdentifier(): string;
 
     /**
      * Gets the route methods.
      *
      * @return string[]
      */
-    public function getMethods();
+    public function getMethods(): array;
 
     /**
      * Gets the route path.
      *
      * @return string
      */
-    public function getPath();
+    public function getPath(): string;
 
     /**
      * Gets the route callback.
      *
-     * @return \Closure|string
+     * @return callable|string
      */
     public function getCallback();
 
@@ -45,26 +45,26 @@ interface RouteInterface
      *
      * @return string[]
      */
-    public function getConstraints();
+    public function getConstraints(): array;
 
     /**
      * Gets a matchable pattern that combines that path and constraints.
      *
      * @return string
      */
-    public function getPattern();
+    public function getPattern(): string;
 
     /**
      * Gets the route name.
      *
-     * @return string
+     * @return string|null
      */
-    public function getName();
+    public function getName(): ?string;
 
     /**
      * Gets the route parameters.
      *
      * @return string[]
      */
-    public function getParams();
+    public function getParams(): array;
 }

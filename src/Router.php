@@ -45,18 +45,18 @@ class Router implements RouterInterface
      */
     public function add(
         $methods,
-        $path,
+        string $path,
         $callback,
         array $constraints = [],
-        $name = null
-    ) {
+        string $name = null
+    ): RouteInterface {
         return $this->routes->add($methods, $path, $callback, $constraints, $name);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function has($name)
+    public function has(string $name): bool
     {
         return $this->routes->has($name);
     }
@@ -64,7 +64,7 @@ class Router implements RouterInterface
     /**
      * {@inheritDoc}
      */
-    public function get($name)
+    public function get(string $name): RouteInterface
     {
         return $this->routes->get($name);
     }
@@ -72,7 +72,7 @@ class Router implements RouterInterface
     /**
      * {@inheritDoc}
      */
-    public function find(ServerRequestInterface $request)
+    public function find(ServerRequestInterface $request): RouteInterface
     {
         return $this->matcher->match($request);
     }
@@ -81,10 +81,10 @@ class Router implements RouterInterface
      * {@inheritDoc}
      */
     public function generateUri(
-        $name,
+        string $name,
         array $params = [],
-        $type = UriGeneratorInterface::ABSOLUTE_PATH
-    ) {
+        string $type = UriGeneratorInterface::ABSOLUTE_PATH
+    ): string {
         return $this->uriGenerator->generate($name, $params, $type);
     }
 }

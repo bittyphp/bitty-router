@@ -24,7 +24,7 @@ class RouteCollection implements RouteCollectionInterface
     /**
      * {@inheritDoc}
      */
-    public function all()
+    public function all(): array
     {
         return $this->routes;
     }
@@ -34,11 +34,11 @@ class RouteCollection implements RouteCollectionInterface
      */
     public function add(
         $methods,
-        $path,
+        string $path,
         $callback,
         array $constraints = [],
-        $name = null
-    ) {
+        string $name = null
+    ): RouteInterface {
         $route = new Route(
             $methods,
             $path,
@@ -60,7 +60,7 @@ class RouteCollection implements RouteCollectionInterface
     /**
      * {@inheritDoc}
      */
-    public function has($name)
+    public function has(string $name): bool
     {
         return isset($this->routes[$name]);
     }
@@ -68,7 +68,7 @@ class RouteCollection implements RouteCollectionInterface
     /**
      * {@inheritDoc}
      */
-    public function get($name)
+    public function get(string $name): RouteInterface
     {
         if (!isset($this->routes[$name])) {
             throw new NotFoundException(sprintf('No route named "%s" exists.', $name));
@@ -80,7 +80,7 @@ class RouteCollection implements RouteCollectionInterface
     /**
      * {@inheritDoc}
      */
-    public function remove($name)
+    public function remove(string $name): void
     {
         if (isset($this->routes[$name])) {
             unset($this->routes[$name]);
