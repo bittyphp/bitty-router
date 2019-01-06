@@ -35,5 +35,9 @@ interface UriGeneratorInterface
      *
      * @throws NotFoundException
      */
-    public function generate($name, array $params = [], $type = self::ABSOLUTE_PATH);
+    public function generate(
+        string $name,
+        array $params = [],
+        string $type = self::ABSOLUTE_PATH
+    ): string;
 }

@@ -13,7 +13,7 @@ interface RouterInterface
      *
      * @param string[]|string $methods
      * @param string $path
-     * @param \Closure|string $callback
+     * @param callable|string $callback
      * @param string[] $constraints
      * @param string|null $name
      *
@@ -21,11 +21,11 @@ interface RouterInterface
      */
     public function add(
         $methods,
-        $path,
+        string $path,
         $callback,
         array $constraints = [],
-        $name = null
-    );
+        string $name = null
+    ): RouteInterface;
 
     /**
      * Checks if a route exists.
@@ -34,7 +34,7 @@ interface RouterInterface
      *
      * @return bool
      */
-    public function has($name);
+    public function has(string $name): bool;
 
     /**
      * Gets a route.
@@ -45,7 +45,7 @@ interface RouterInterface
      *
      * @throws NotFoundException When route does not exist.
      */
-    public function get($name);
+    public function get(string $name): RouteInterface;
 
     /**
      * Finds a route for the given request.
@@ -56,17 +56,22 @@ interface RouterInterface
      *
      * @throws NotFoundException When unable to find a route.
      */
-    public function find(ServerRequestInterface $request);
+    public function find(ServerRequestInterface $request): RouteInterface;
 
     /**
      * Generates a URI for a named route.
      *
      * @param string $name Name of the route.
      * @param mixed[] $params Key/value array of parameters to use.
+     * @param string $type Type of URI to generate.
      *
      * @return string
      *
      * @throws NotFoundException When unable to find route.
      */
-    public function generateUri($name, array $params = []);
+    public function generateUri(
+        string $name,
+        array $params = [],
+        string $type = UriGeneratorInterface::ABSOLUTE_PATH
+    ): string;
 }

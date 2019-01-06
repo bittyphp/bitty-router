@@ -24,7 +24,7 @@ class CallbackBuilder implements CallbackBuilderInterface
     /**
      * {@inheritDoc}
      */
-    public function build($callback)
+    public function build($callback): array
     {
         if ($callback instanceof \Closure) {
             $callback = $callback->bindTo($this->container);
@@ -59,7 +59,7 @@ class CallbackBuilder implements CallbackBuilderInterface
      *
      * @return mixed[]
      */
-    protected function getClassAndMethod($callback)
+    protected function getClassAndMethod(string $callback): array
     {
         $parts = explode(':', $callback);
         if (2 === count($parts)) {

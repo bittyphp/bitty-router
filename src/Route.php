@@ -30,7 +30,7 @@ class Route implements RouteInterface
     /**
      * Route callback.
      *
-     * @var \Closure|string
+     * @var callable|string
      */
     protected $callback = null;
 
@@ -44,7 +44,7 @@ class Route implements RouteInterface
     /**
      * Route name.
      *
-     * @var string
+     * @var string|null
      */
     protected $name = null;
 
@@ -58,18 +58,18 @@ class Route implements RouteInterface
     /**
      * @param string[]|string $methods
      * @param string $path
-     * @param \Closure|string $callback
+     * @param callable|string $callback
      * @param string[] $constraints
      * @param string|null $name
      * @param int $identifier
      */
     public function __construct(
         $methods,
-        $path,
+        string $path,
         $callback,
         array $constraints = [],
-        $name = null,
-        $identifier = 0
+        string $name = null,
+        int $identifier = 0
     ) {
         $this->setMethods($methods);
         $this->setPath($path);
@@ -82,7 +82,7 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getIdentifier()
+    public function getIdentifier(): string
     {
         return $this->identifier;
     }
@@ -92,7 +92,7 @@ class Route implements RouteInterface
      *
      * @param string[]|string $methods List of request methods to allow.
      */
-    public function setMethods($methods)
+    public function setMethods($methods): void
     {
         $this->methods = array_map('strtoupper', (array) $methods);
     }
@@ -100,7 +100,7 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getMethods()
+    public function getMethods(): array
     {
         return $this->methods;
     }
@@ -110,7 +110,7 @@ class Route implements RouteInterface
      *
      * @param string $path Route path.
      */
-    public function setPath($path)
+    public function setPath(string $path): void
     {
         $this->path = $path;
     }
@@ -118,7 +118,7 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
@@ -130,7 +130,7 @@ class Route implements RouteInterface
      *
      * @throws \InvalidArgumentException
      */
-    public function setCallback($callback)
+    public function setCallback($callback): void
     {
         if (is_callable($callback) || is_string($callback)) {
             $this->callback = $callback;
@@ -159,7 +159,7 @@ class Route implements RouteInterface
      *
      * @param string[] $constraints List of constraints for route variables.
      */
-    public function setConstraints(array $constraints)
+    public function setConstraints(array $constraints): void
     {
         $this->constraints = $constraints;
     }
@@ -167,7 +167,7 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getConstraints()
+    public function getConstraints(): array
     {
         return $this->constraints;
     }
@@ -175,7 +175,7 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getPattern()
+    public function getPattern(): string
     {
         $pattern = $this->path;
 
@@ -193,9 +193,9 @@ class Route implements RouteInterface
     /**
      * Sets the route name.
      *
-     * @param string $name Route name.
+     * @param string|null $name Route name.
      */
-    public function setName($name)
+    public function setName($name): void
     {
         $this->name = $name;
     }
@@ -203,7 +203,7 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -213,7 +213,7 @@ class Route implements RouteInterface
      *
      * @param string[] $params Parameters to pass to the route.
      */
-    public function setParams(array $params)
+    public function setParams(array $params): void
     {
         $this->params = $params;
     }
@@ -221,7 +221,7 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getParams()
+    public function getParams(): array
     {
         return $this->params;
     }

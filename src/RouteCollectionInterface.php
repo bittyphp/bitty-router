@@ -12,14 +12,14 @@ interface RouteCollectionInterface
      *
      * @return RouteInterface[]
      */
-    public function all();
+    public function all(): array;
 
     /**
      * Adds a new route.
      *
      * @param string[]|string $methods
      * @param string $path
-     * @param \Closure|string $callback
+     * @param callable|string|mixed $callback
      * @param string[] $constraints
      * @param string|null $name
      *
@@ -27,11 +27,11 @@ interface RouteCollectionInterface
      */
     public function add(
         $methods,
-        $path,
+        string $path,
         $callback,
         array $constraints = [],
-        $name = null
-    );
+        string $name = null
+    ): RouteInterface;
 
     /**
      * Checks if a route exists.
@@ -40,23 +40,23 @@ interface RouteCollectionInterface
      *
      * @return bool
      */
-    public function has($name);
+    public function has(string $name): bool;
 
     /**
      * Gets a route by name.
      *
      * @param string $name
      *
-     * @return mixed
+     * @return RouteInterface
      *
      * @throws NotFoundException
      */
-    public function get($name);
+    public function get(string $name): RouteInterface;
 
     /**
      * Removes a route.
      *
      * @param string $name
      */
-    public function remove($name);
+    public function remove(string $name): void;
 }

@@ -7,6 +7,7 @@ use Bitty\Router\Route;
 use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteMatcher;
 use Bitty\Router\RouteMatcherInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
@@ -19,11 +20,11 @@ class RouteMatcherTest extends TestCase
     protected $fixture = null;
 
     /**
-     * @var RouteCollectionInterface
+     * @var RouteCollectionInterface|MockObject
      */
     protected $routes = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -32,16 +33,27 @@ class RouteMatcherTest extends TestCase
         $this->fixture = new RouteMatcher($this->routes);
     }
 
-    public function testInstanceOf()
+    public function testInstanceOf(): void
     {
-        $this->assertInstanceOf(RouteMatcherInterface::class, $this->fixture);
+        self::assertInstanceOf(RouteMatcherInterface::class, $this->fixture);
     }
 
     /**
+     * @param array $routeData
+     * @param string $path
+     * @param string $method
+     * @param string $expectedName
+     * @param array $expecedParams
+     *
      * @dataProvider sampleMatch
      */
-    public function testMatch($routeData, $path, $method, $expectedName, $expecedParams)
-    {
+    public function testMatch(
+        array $routeData,
+        string $path,
+        string $method,
+        string $expectedName,
+        array $expecedParams
+    ): void {
         $request = $this->createRequest($method, $path);
         $routes  = [];
         foreach ($routeData as $data) {
@@ -52,11 +64,11 @@ class RouteMatcherTest extends TestCase
 
         $actual = $this->fixture->match($request);
 
-        $this->assertEquals($expectedName, $actual->getName());
-        $this->assertEquals($expecedParams, $actual->getParams());
+        self::assertEquals($expectedName, $actual->getName());
+        self::assertEquals($expecedParams, $actual->getParams());
     }
 
-    public function sampleMatch()
+    public function sampleMatch(): array
     {
         $nameA    = uniqid('name');
         $nameB    = uniqid('name');
@@ -146,7 +158,7 @@ class RouteMatcherTest extends TestCase
         ];
     }
 
-    public function testMatchThrowsException()
+    public function testMatchThrowsException(): void
     {
         $request = $this->createRequest();
         $this->routes->method('all')->willReturn([]);

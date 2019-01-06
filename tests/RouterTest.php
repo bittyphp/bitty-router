@@ -8,6 +8,7 @@ use Bitty\Router\RouteMatcherInterface;
 use Bitty\Router\Router;
 use Bitty\Router\RouterInterface;
 use Bitty\Router\UriGeneratorInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -19,21 +20,21 @@ class RouterTest extends TestCase
     protected $fixture = null;
 
     /**
-     * @var RouteCollectionInterface
+     * @var RouteCollectionInterface|MockObject
      */
     protected $routes = null;
 
     /**
-     * @var RouteMatcherInterface
+     * @var RouteMatcherInterface|MockObject
      */
     protected $matcher = null;
 
     /**
-     * @var UriGeneratorInterface
+     * @var UriGeneratorInterface|MockObject
      */
     protected $uriGenerator = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -44,12 +45,12 @@ class RouterTest extends TestCase
         $this->fixture = new Router($this->routes, $this->matcher, $this->uriGenerator);
     }
 
-    public function testInstanceOf()
+    public function testInstanceOf(): void
     {
-        $this->assertInstanceOf(RouterInterface::class, $this->fixture);
+        self::assertInstanceOf(RouterInterface::class, $this->fixture);
     }
 
-    public function testAdd()
+    public function testAdd(): void
     {
         $methods     = [uniqid('method'), uniqid('method')];
         $path        = uniqid('path');
@@ -58,72 +59,72 @@ class RouterTest extends TestCase
         $constraints = [uniqid('key') => uniqid('value')];
         $name        = uniqid('name');
 
-        $this->routes->expects($this->once())
+        $this->routes->expects(self::once())
             ->method('add')
             ->with($methods, $path, $callable, $constraints, $name);
 
         $this->fixture->add($methods, $path, $callable, $constraints, $name);
     }
 
-    public function testHas()
+    public function testHas(): void
     {
         $name = uniqid();
         $has  = (bool) rand(0, 1);
 
-        $this->routes->expects($this->once())
+        $this->routes->expects(self::once())
             ->method('has')
             ->with($name)
             ->willReturn($has);
 
         $actual = $this->fixture->has($name);
 
-        $this->assertEquals($has, $actual);
+        self::assertEquals($has, $actual);
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         $name  = uniqid();
         $route = $this->createMock(RouteInterface::class);
 
-        $this->routes->expects($this->once())
+        $this->routes->expects(self::once())
             ->method('get')
             ->with($name)
             ->willReturn($route);
 
         $actual = $this->fixture->get($name);
 
-        $this->assertSame($route, $actual);
+        self::assertSame($route, $actual);
     }
 
-    public function testFind()
+    public function testFind(): void
     {
         $route   = $this->createMock(RouteInterface::class);
         $request = $this->createMock(ServerRequestInterface::class);
 
-        $this->matcher->expects($this->once())
+        $this->matcher->expects(self::once())
             ->method('match')
             ->with($request)
             ->willReturn($route);
 
         $actual = $this->fixture->find($request);
 
-        $this->assertSame($route, $actual);
+        self::assertSame($route, $actual);
     }
 
-    public function testGenerateUri()
+    public function testGenerateUri(): void
     {
         $name   = uniqid('name');
         $params = [uniqid('param'), uniqid('param')];
         $type   = uniqid('type');
         $uri    = uniqid('uri');
 
-        $this->uriGenerator->expects($this->once())
+        $this->uriGenerator->expects(self::once())
             ->method('generate')
             ->with($name, $params, $type)
             ->willReturn($uri);
 
         $actual = $this->fixture->generateUri($name, $params, $type);
 
-        $this->assertEquals($uri, $actual);
+        self::assertEquals($uri, $actual);
     }
 }

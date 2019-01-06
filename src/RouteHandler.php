@@ -46,10 +46,12 @@ class RouteHandler implements RequestHandlerInterface
         }
 
         if (null !== $action) {
-            return call_user_func_array(
-                [$controller, $action],
-                [$request]
-            );
+            /**
+             * @var callable
+             */
+            $callable = [$controller, $action];
+
+            return call_user_func_array($callable, [$request]);
         }
 
         return $controller($request);
