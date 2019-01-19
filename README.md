@@ -1,9 +1,9 @@
 # Bitty Router
 
-[![Build Status](https://travis-ci.org/bittyphp/bitty-router.svg?branch=master)](https://travis-ci.org/bittyphp/bitty-router)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/df88477403554bd9aceef89d761644f3)](https://www.codacy.com/app/bittyphp/bitty-router)
-[![Total Downloads](https://poser.pugx.org/bittyphp/bitty-router/downloads)](https://packagist.org/packages/bittyphp/bitty-router)
-[![License](https://poser.pugx.org/bittyphp/bitty-router/license)](https://packagist.org/packages/bittyphp/bitty-router)
+[![Build Status](https://travis-ci.org/bittyphp/router.svg?branch=master)](https://travis-ci.org/bittyphp/router)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/df88477403554bd9aceef89d761644f3)](https://www.codacy.com/app/bittyphp/router)
+[![Total Downloads](https://poser.pugx.org/bittyphp/router/downloads)](https://packagist.org/packages/bittyphp/router)
+[![License](https://poser.pugx.org/bittyphp/router/license)](https://packagist.org/packages/bittyphp/router)
 
 Bitty's router is a [PSR-15](https://www.php-fig.org/psr/psr-15/) middleware component and supports [PSR-7](http://www.php-fig.org/psr/psr-7/) HTTP message interfaces. When a route is called, it is passed an instance of `Psr\Http\Message\ServerRequestInterface` and must return an instance of `Psr\Http\Message\ResponseInterface`.
 
@@ -12,7 +12,7 @@ Bitty's router is a [PSR-15](https://www.php-fig.org/psr/psr-15/) middleware com
 It's best to install using [Composer](https://getcomposer.org/).
 
 ```sh
-$ composer require bittyphp/bitty-router
+$ composer require bittyphp/router
 ```
 
 ### Setup
