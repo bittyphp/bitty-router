@@ -7,7 +7,7 @@ use Bitty\Router\Exception\NotFoundException;
 interface UriGeneratorInterface
 {
     /**
-     * Indicates to return an absolute URI, a.k.a a full URL.
+     * Indicates to return an absolute URI, a.k.a. a full URL.
      *
      * For example, http://www.example.com/some/path.html
      *
