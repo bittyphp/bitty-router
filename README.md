@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/bittyphp/router.svg?branch=master)](https://travis-ci.org/bittyphp/router)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/df88477403554bd9aceef89d761644f3)](https://www.codacy.com/app/bittyphp/router)
+[![PHPStan Enabled](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
 [![Total Downloads](https://poser.pugx.org/bittyphp/router/downloads)](https://packagist.org/packages/bittyphp/router)
 [![License](https://poser.pugx.org/bittyphp/router/license)](https://packagist.org/packages/bittyphp/router)
 
