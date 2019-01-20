@@ -328,6 +328,32 @@ The middleware layer is made of two parts: the route handler and the middleware 
 
 The `RouteHandler` is responsible for determining which action to take for a desired route and returning the response from that action. It can be passed into any service that accepts `Psr\Http\Server\RequestHandlerInterface`.
 
+```php
+<?php
+
+use Bitty\Router\CallbackBuilder;
+use Bitty\Router\RouteHandler;
+use Bitty\Router\Router;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+/** @var ContainerInterface */
+$container = ...;
+
+$handler = new RouteHandler(
+    new Router(...),
+    new CallbackBuilder($container)
+);
+
+/** @var ServerRequestInterface */
+$request = ...;
+
+/** @var ResponseInterface */
+$response = $handler->handle($request);
+
+```
+
 ### Routing Middleware
 
 The router can be set up as a PSR middleware component to handle HTTP requests. The middleware object can be passed into anything that accepts `Psr\Http\Server\MiddlewareInterface`.
@@ -335,20 +361,11 @@ The router can be set up as a PSR middleware component to handle HTTP requests. 
 ```php
 <?php
 
-use Bitty\Router\CallbackBuilder;
 use Bitty\Router\RouteHandler;
-use Bitty\Router\Router;
 use Bitty\Router\RoutingMiddleware;
-use Psr\Container\ContainerInterface;
-
-/** @var ContainerInterface */
-$container = ...;
 
 $middleware = new RoutingMiddleware(
-    new RouteHandler(
-        new Router(...),
-        new CallbackBuilder($container)
-    )
+    new RouteHandler(...)
 );
 
 ```
