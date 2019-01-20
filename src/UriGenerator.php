@@ -43,7 +43,9 @@ class UriGenerator implements UriGeneratorInterface
         $requiredParams = $this->getRequiredParams($path);
         foreach ($requiredParams as $param) {
             if (!isset($params[$param])) {
-                throw new UriGeneratorException(sprintf('Parameter "%s" is required.', $param));
+                throw new UriGeneratorException(
+                    sprintf('Parameter "%s" is required.', $param)
+                );
             }
 
             $path = str_replace('{'.$param.'}', (string) $params[$param], $path);
