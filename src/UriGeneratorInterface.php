@@ -13,7 +13,7 @@ interface UriGeneratorInterface
      *
      * @var string
      */
-    const ABSOLUTE_URI = 'absolute-uri';
+    public const ABSOLUTE_URI = 'absolute-uri';
 
     /**
      * Indicates to return an absolute path (relative to root).
@@ -22,7 +22,7 @@ interface UriGeneratorInterface
      *
      * @var string
      */
-    const ABSOLUTE_PATH = 'absolute-path';
+    public const ABSOLUTE_PATH = 'absolute-path';
 
     /**
      * Generates a URI for the given named route.
