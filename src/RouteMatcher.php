@@ -13,7 +13,7 @@ class RouteMatcher implements RouteMatcherInterface
     /**
      * @var RouteCollectionInterface
      */
-    protected $routes = null;
+    private $routes = null;
 
     /**
      * @param RouteCollectionInterface $routes
@@ -52,7 +52,7 @@ class RouteMatcher implements RouteMatcherInterface
      *
      * @return bool
      */
-    protected function isMethodMatch(RouteInterface $route, string $method): bool
+    private function isMethodMatch(RouteInterface $route, string $method): bool
     {
         $methods = $route->getMethods();
         if ([] === $methods) {
@@ -71,7 +71,7 @@ class RouteMatcher implements RouteMatcherInterface
      *
      * @return bool
      */
-    protected function isPathMatch(RouteInterface $route, string $path): bool
+    private function isPathMatch(RouteInterface $route, string $path): bool
     {
         $pattern = $route->getPattern();
         $matches = [];

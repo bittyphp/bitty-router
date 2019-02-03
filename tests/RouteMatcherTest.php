@@ -181,7 +181,7 @@ class RouteMatcherTest extends TestCase
      *
      * @return Route
      */
-    protected function createRoute(
+    private function createRoute(
         $methods,
         $path,
         $callback,
@@ -199,7 +199,7 @@ class RouteMatcherTest extends TestCase
      *
      * @return ServerRequestInterface
      */
-    protected function createRequest($method = 'GET', $path = '/')
+    private function createRequest($method = 'GET', $path = '/')
     {
         $uri = $this->createConfiguredMock(UriInterface::class, ['getPath' => $path]);
 

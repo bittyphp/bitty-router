@@ -176,7 +176,7 @@ class RouteHandlerTest extends TestCase
      *
      * @return ServerRequestInterface|MockObject
      */
-    protected function createRequest($path = '', $method = 'GET'): ServerRequestInterface
+    private function createRequest($path = '', $method = 'GET'): ServerRequestInterface
     {
         $uri = $this->createConfiguredMock(
             UriInterface::class,
@@ -198,7 +198,7 @@ class RouteHandlerTest extends TestCase
     /**
      * @return ResponseInterface|MockObject
      */
-    protected function createResponse(): ResponseInterface
+    private function createResponse(): ResponseInterface
     {
         return $this->createMock(ResponseInterface::class);
     }
@@ -211,7 +211,7 @@ class RouteHandlerTest extends TestCase
      *
      * @return RouteInterface|MockObject
      */
-    protected function createRoute($callback = null, array $params = []): RouteInterface
+    private function createRoute($callback = null, array $params = []): RouteInterface
     {
         return $this->createConfiguredMock(
             RouteInterface::class,

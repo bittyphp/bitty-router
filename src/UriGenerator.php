@@ -12,12 +12,12 @@ class UriGenerator implements UriGeneratorInterface
     /**
      * @var RouteCollectionInterface
      */
-    protected $routes = null;
+    private $routes = null;
 
     /**
      * @var string
      */
-    protected $domain = null;
+    private $domain = null;
 
     /**
      * @param RouteCollectionInterface $routes
@@ -74,7 +74,7 @@ class UriGenerator implements UriGeneratorInterface
      *
      * @return string[] Array of required parameter names.
      */
-    protected function getRequiredParams(string $path): array
+    private function getRequiredParams(string $path): array
     {
         $matches = [];
         preg_match_all('/\{([\w-]+)\}/', $path, $matches);

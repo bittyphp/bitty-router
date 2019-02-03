@@ -13,7 +13,7 @@ class RoutingMiddleware implements MiddlewareInterface
     /**
      * @var RequestHandlerInterface
      */
-    protected $routeHandler = null;
+    private $routeHandler = null;
 
     /**
      * @param RequestHandlerInterface $routeHandler
