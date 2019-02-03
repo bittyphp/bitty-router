@@ -60,7 +60,7 @@ class UriGenerator implements UriGeneratorInterface
 
         $query = [];
         foreach ($params as $id => $value) {
-            $query[] = urlencode(urldecode($id))
+            $query[] = urlencode(urldecode(strval($id)))
                 .'='.urlencode(urldecode($value));
         }
 
