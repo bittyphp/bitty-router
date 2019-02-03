@@ -48,7 +48,7 @@ class UriGenerator implements UriGeneratorInterface
                 );
             }
 
-            $path = str_replace('{'.$param.'}', (string) $params[$param], $path);
+            $path = str_replace('{'.$param.'}', $params[$param], $path);
             unset($params[$param]);
         }
 
@@ -60,11 +60,11 @@ class UriGenerator implements UriGeneratorInterface
 
         $query = [];
         foreach ($params as $id => $value) {
-            $query[] = urlencode(urldecode((string) $id))
-                .'='.urlencode(urldecode((string) $value));
+            $query[] = urlencode(urldecode($id))
+                .'='.urlencode(urldecode($value));
         }
 
-        return (string) $uri->withQuery(implode('&', $query));
+        return $uri->withQuery(implode('&', $query));
     }
 
     /**
@@ -78,7 +78,8 @@ class UriGenerator implements UriGeneratorInterface
     {
         $matches = [];
         preg_match_all('/\{([\w-]+)\}/', $path, $matches);
+        array_shift($matches);
 
-        return count($matches) > 1 ? $matches[1] : [];
+        return !empty($matches) ? $matches[0] : [];
     }
 }
