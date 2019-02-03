@@ -12,14 +12,14 @@ class RouteCollection implements RouteCollectionInterface
     /**
      * @var RouteInterface[]
      */
-    protected $routes = [];
+    private $routes = [];
 
     /**
      * Route counter.
      *
      * @var int
      */
-    protected $routeCounter = 0;
+    private $routeCounter = 0;
 
     /**
      * {@inheritDoc}

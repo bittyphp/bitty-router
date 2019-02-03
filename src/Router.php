@@ -13,17 +13,17 @@ class Router implements RouterInterface
     /**
      * @var RouteCollectionInterface
      */
-    protected $routes = null;
+    private $routes = null;
 
     /**
      * @var RouteMatcherInterface
      */
-    protected $matcher = null;
+    private $matcher = null;
 
     /**
      * @var UriGeneratorInterface
      */
-    protected $uriGenerator = null;
+    private $uriGenerator = null;
 
     /**
      * @param RouteCollectionInterface $routes

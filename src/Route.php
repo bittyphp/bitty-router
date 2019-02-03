@@ -11,49 +11,49 @@ class Route implements RouteInterface
      *
      * @var string
      */
-    protected $identifier = null;
+    private $identifier = null;
 
     /**
      * List of allowed request methods, e.g. GET, POST, etc.
      *
      * @var string[]
      */
-    protected $methods = [];
+    private $methods = [];
 
     /**
      * Route path.
      *
      * @var string
      */
-    protected $path = null;
+    private $path = null;
 
     /**
      * Route callback.
      *
      * @var callable|string
      */
-    protected $callback = null;
+    private $callback = null;
 
     /**
      * List of constraints for route variables.
      *
      * @var string[]
      */
-    protected $constraints = [];
+    private $constraints = [];
 
     /**
      * Route name.
      *
      * @var string|null
      */
-    protected $name = null;
+    private $name = null;
 
     /**
      * Parameters to pass to the route.
      *
      * @var string[]
      */
-    protected $params = [];
+    private $params = [];
 
     /**
      * @param string[]|string $methods

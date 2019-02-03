@@ -11,7 +11,7 @@ class CallbackBuilder implements CallbackBuilderInterface
     /**
      * @var ContainerInterface
      */
-    protected $container = null;
+    private $container = null;
 
     /**
      * @param ContainerInterface $container
@@ -59,7 +59,7 @@ class CallbackBuilder implements CallbackBuilderInterface
      *
      * @return mixed[]
      */
-    protected function getClassAndMethod(string $callback): array
+    private function getClassAndMethod(string $callback): array
     {
         $parts = explode(':', $callback);
         if (2 === count($parts)) {

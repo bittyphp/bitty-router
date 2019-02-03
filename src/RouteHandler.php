@@ -13,12 +13,12 @@ class RouteHandler implements RequestHandlerInterface
     /**
      * @var RouterInterface
      */
-    protected $router = null;
+    private $router = null;
 
     /**
      * @var CallbackBuilderInterface
      */
-    protected $builder = null;
+    private $builder = null;
 
     /**
      * @param RouterInterface $router
