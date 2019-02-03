@@ -81,7 +81,7 @@ class UriGeneratorTest extends TestCase
         $name   = uniqid('name');
         $pathA  = '/'.uniqid('path');
         $pathB  = uniqid('path');
-        $paramA = uniqid('param');
+        $paramA = rand(); // non-string
         $paramB = uniqid('param');
         $domain = uniqid('domain');
 
@@ -122,9 +122,9 @@ class UriGeneratorTest extends TestCase
                 'path' => $pathA,
                 'domain' => '',
                 'name' => $name,
-                'params' => ['paramA' => $paramA, 'paramB' => $paramB],
+                'params' => [123 => $paramA, 'paramB' => $paramB],
                 'type' => UriGeneratorInterface::ABSOLUTE_PATH,
-                'expected' => $pathA.'?paramA='.$paramA.'&paramB='.$paramB,
+                'expected' => $pathA.'?123='.$paramA.'&paramB='.$paramB,
             ],
             'mixed params' => [
                 'path' => $pathA.'/{paramA}',
