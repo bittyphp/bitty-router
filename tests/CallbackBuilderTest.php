@@ -38,9 +38,11 @@ class CallbackBuilderTest extends TestCase
     public function testBuildSetsContainerOnClosure(): void
     {
         $callback = function () {
-            if (!$this instanceof ContainerInterface) {
-                self::fail('Container not set');
+            if ($this instanceof ContainerInterface) {
+                return;
             }
+
+            self::fail('Container not set');
         };
 
         $actual = $this->fixture->build($callback);

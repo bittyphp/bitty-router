@@ -37,7 +37,7 @@ class RouteCollection implements RouteCollectionInterface
         string $path,
         $callback,
         array $constraints = [],
-        string $name = null
+        ?string $name = null
     ): RouteInterface {
         $route = new Route(
             $methods,
@@ -48,7 +48,7 @@ class RouteCollection implements RouteCollectionInterface
             $this->routeCounter++
         );
 
-        if (null === $name) {
+        if ($name === null) {
             $name = $route->getIdentifier();
         }
 
@@ -82,8 +82,10 @@ class RouteCollection implements RouteCollectionInterface
      */
     public function remove(string $name): void
     {
-        if (isset($this->routes[$name])) {
-            unset($this->routes[$name]);
+        if (!isset($this->routes[$name])) {
+            return;
         }
+
+        unset($this->routes[$name]);
     }
 }

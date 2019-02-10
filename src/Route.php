@@ -68,7 +68,7 @@ class Route implements RouteInterface
         string $path,
         $callback,
         array $constraints = [],
-        string $name = null,
+        ?string $name = null,
         int $identifier = 0
     ) {
         $this->setMethods($methods);

@@ -55,7 +55,7 @@ class RouteMatcher implements RouteMatcherInterface
     private function isMethodMatch(RouteInterface $route, string $method): bool
     {
         $methods = $route->getMethods();
-        if ([] === $methods) {
+        if ($methods === []) {
             // any method allowed
             return true;
         }
@@ -81,9 +81,11 @@ class RouteMatcher implements RouteMatcherInterface
 
         $params = [];
         foreach ($matches as $key => $value) {
-            if (!is_int($key)) {
-                $params[$key] = $value;
+            if (is_int($key)) {
+                continue;
             }
+
+            $params[$key] = $value;
         }
 
         if (method_exists($route, 'setParams')) {
