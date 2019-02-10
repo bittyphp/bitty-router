@@ -52,7 +52,7 @@ class UriGenerator implements UriGeneratorInterface
             unset($params[$param]);
         }
 
-        if (self::ABSOLUTE_URI === $type) {
+        if ($type === self::ABSOLUTE_URI) {
             $uri = new Uri($this->domain.'/'.ltrim($path, '/'));
         } else {
             $uri = new Uri($path);

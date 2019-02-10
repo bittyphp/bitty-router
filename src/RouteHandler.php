@@ -39,13 +39,13 @@ class RouteHandler implements RequestHandlerInterface
         $callback = $route->getCallback();
         $params   = $route->getParams();
 
-        list($controller, $action) = $this->builder->build($callback);
+        [$controller, $action] = $this->builder->build($callback);
 
         foreach ($params as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
 
-        if (null !== $action) {
+        if ($action !== null) {
             /**
              * @var callable
              */

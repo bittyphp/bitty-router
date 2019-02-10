@@ -24,7 +24,7 @@ interface RouterInterface
         string $path,
         $callback,
         array $constraints = [],
-        string $name = null
+        ?string $name = null
     ): RouteInterface;
 
     /**

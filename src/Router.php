@@ -48,7 +48,7 @@ class Router implements RouterInterface
         string $path,
         $callback,
         array $constraints = [],
-        string $name = null
+        ?string $name = null
     ): RouteInterface {
         return $this->routes->add($methods, $path, $callback, $constraints, $name);
     }

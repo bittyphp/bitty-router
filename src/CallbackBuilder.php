@@ -41,7 +41,7 @@ class CallbackBuilder implements CallbackBuilderInterface
             );
         }
 
-        list($class, $method) = $this->getClassAndMethod($callback);
+        [$class, $method] = $this->getClassAndMethod($callback);
 
         if ($this->container->has($class)) {
             $object = $this->container->get($class);
@@ -62,11 +62,11 @@ class CallbackBuilder implements CallbackBuilderInterface
     private function getClassAndMethod(string $callback): array
     {
         $parts = explode(':', $callback);
-        if (2 === count($parts)) {
+        if (count($parts) === 2) {
             return $parts;
         }
 
-        if (1 !== count($parts)) {
+        if (count($parts) !== 1) {
             throw new RouterException(
                 sprintf('Callback "%s" is malformed.', $callback)
             );
