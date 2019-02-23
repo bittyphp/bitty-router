@@ -42,6 +42,13 @@ class Route implements RouteInterface
     private $constraints = [];
 
     /**
+     * The URI pattern to match.
+     *
+     * @var string|null
+     */
+    private $pattern = null;
+
+    /**
      * Route name.
      *
      * @var string|null
@@ -113,6 +120,7 @@ class Route implements RouteInterface
     public function setPath(string $path): void
     {
         $this->path = $path;
+        $this->pattern = null;
     }
 
     /**
@@ -162,6 +170,7 @@ class Route implements RouteInterface
     public function setConstraints(array $constraints): void
     {
         $this->constraints = $constraints;
+        $this->pattern = null;
     }
 
     /**
@@ -177,17 +186,21 @@ class Route implements RouteInterface
      */
     public function getPattern(): string
     {
-        $pattern = $this->path;
+        if ($this->pattern !== null) {
+            return $this->pattern;
+        }
+
+        $this->pattern = $this->path;
 
         foreach ($this->constraints as $name => $regex) {
-            $pattern = str_replace(
+            $this->pattern = str_replace(
                 '{'.$name.'}',
                 '(?<'.$name.'>'.$regex.')',
-                $pattern
+                $this->pattern
             );
         }
 
-        return $pattern;
+        return $this->pattern;
     }
 
     /**
