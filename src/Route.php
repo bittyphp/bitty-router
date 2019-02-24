@@ -42,6 +42,13 @@ class Route implements RouteInterface
     private $constraints = [];
 
     /**
+     * The URI pattern to match.
+     *
+     * @var string|null
+     */
+    private $pattern = null;
+
+    /**
      * Route name.
      *
      * @var string|null
@@ -51,7 +58,7 @@ class Route implements RouteInterface
     /**
      * Parameters to pass to the route.
      *
-     * @var string[]
+     * @var array<string|null>
      */
     private $params = [];
 
@@ -113,6 +120,7 @@ class Route implements RouteInterface
     public function setPath(string $path): void
     {
         $this->path = $path;
+        $this->pattern = null;
     }
 
     /**
@@ -162,6 +170,7 @@ class Route implements RouteInterface
     public function setConstraints(array $constraints): void
     {
         $this->constraints = $constraints;
+        $this->pattern = null;
     }
 
     /**
@@ -177,17 +186,52 @@ class Route implements RouteInterface
      */
     public function getPattern(): string
     {
-        $pattern = $this->path;
-
-        foreach ($this->constraints as $name => $regex) {
-            $pattern = str_replace(
-                '{'.$name.'}',
-                '(?<'.$name.'>'.$regex.')',
-                $pattern
-            );
+        if ($this->pattern !== null) {
+            return $this->pattern;
         }
 
-        return $pattern;
+        $deliminator = '`';
+        $separators = '/.';
+        $this->pattern = $deliminator.'^';
+
+        $pos = 0;
+        $matches = [];
+        preg_match_all(
+            $deliminator.'\{(\w+)(\?[^\}]*?)?\}'.$deliminator,
+            $this->path,
+            $matches,
+            PREG_SET_ORDER|PREG_OFFSET_CAPTURE
+        );
+
+        foreach ($matches as $match) {
+            $string = $match[0][0];
+            /** @var int $offset */
+            $offset = $match[0][1];
+            $name = $match[1][0];
+            $regex = '(?<'.$name.'>'.($this->constraints[$name] ?? '.+?').')';
+            $previousText = substr($this->path, $pos, $offset - $pos);
+            $previousChar = substr($previousText, -1);
+            $pos = $offset + strlen($string);
+
+            if (isset($match[2])) {
+                $default = substr($match[2][0], 1);
+                $this->params[$name] = $default ?: null;
+                if (preg_match($deliminator.'['.$separators.']'.$deliminator, $previousChar)) {
+                    $previousText = substr($previousText, 0, -1);
+                    $regex = '(?:'.preg_quote($previousChar, $deliminator).$regex.')?';
+                } else {
+                    $regex .= '?';
+                }
+            }
+
+            $this->pattern .= preg_quote($previousText, $deliminator).$regex;
+        }
+
+        $remainingText = substr($this->path, $pos);
+        $this->pattern .= preg_quote($remainingText, $deliminator);
+        $this->pattern .= '$'.$deliminator;
+
+        return $this->pattern;
     }
 
     /**
@@ -211,7 +255,7 @@ class Route implements RouteInterface
     /**
      * Sets the route parameters.
      *
-     * @param string[] $params Parameters to pass to the route.
+     * @param array<string|null> $params Parameters to pass to the route.
      */
     public function setParams(array $params): void
     {

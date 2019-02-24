@@ -215,18 +215,106 @@ class RouteTest extends TestCase
         self::assertEquals($params, $actual);
     }
 
-    public function testGetPattern(): void
+    /**
+     * @param string $path
+     * @param array $constraints
+     * @param string $expected
+     *
+     * @dataProvider samplePatterns
+     */
+    public function testGetPattern(string $path, array $constraints, string $expected): void
     {
-        $key    = uniqid();
-        $value  = '\d{'.rand(1, 9).'}';
-        $prefix = uniqid().'/';
-        $suffix = '/'.uniqid();
-        $path   = $prefix.'{'.$key.'}'.$suffix;
-
-        $fixture = new Route([], $path, uniqid(), [$key => $value]);
+        $fixture = new Route([], $path, uniqid(), $constraints);
 
         $actual = $fixture->getPattern();
 
-        self::assertEquals($prefix.'(?<'.$key.'>'.$value.')'.$suffix, $actual);
+        self::assertEquals($expected, $actual);
+    }
+
+    public function samplePatterns(): array
+    {
+        $varA   = uniqid('a');
+        $varB   = uniqid('bb');
+        $varC   = uniqid('ccc');
+        $valueA = '\d{'.rand(1, 9).'}';
+        $valueB = '\d{'.rand(1, 9).'}';
+        $valueC = '\d{'.rand(1, 9).'}';
+        $pathA  = uniqid();
+        $pathB  = uniqid();
+
+        return [
+            'no patterns' => [
+                'path' => $pathA,
+                'constraints' => [],
+                'expected' => '`^'.$pathA.'$`',
+            ],
+            'one pattern, start' => [
+                'path' => '{'.$varA.'}/'.$pathA,
+                'constraints' => [$varA => $valueA],
+                'expected' => '`^(?<'.$varA.'>'.$valueA.')/'.$pathA.'$`',
+            ],
+            'one pattern, middle' => [
+                'path' => $pathA.'/{'.$varA.'}/'.$pathB,
+                'constraints' => [$varA => $valueA],
+                'expected' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')/'.$pathB.'$`',
+            ],
+            'one pattern, end' => [
+                'path' => $pathA.'/{'.$varA.'}',
+                'constraints' => [$varA => $valueA],
+                'expected' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')$`',
+            ],
+            'one pattern, no constraint' => [
+                'path' => $pathA.'{'.$varA.'}',
+                'constraints' => [],
+                'expected' => '`^'.$pathA.'(?<'.$varA.'>.+?)$`',
+            ],
+            'multiple patterns' => [
+                'path' => $pathA.'/{'.$varA.'}{'.$varB.'}/{'.$varC.'}',
+                'constraints' => [
+                    $varA => $valueA,
+                    $varB => $valueB,
+                ],
+                'expected' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')(?<'.$varB.'>'.$valueB.')'
+                    .'/(?<'.$varC.'>.+?)$`',
+            ],
+            'optional pattern' => [
+                'path' => $pathA.'{'.$varA.'?}'.$pathB,
+                'constraints' => [$varA => $valueA],
+                'expected' => '`^'.$pathA.'(?<'.$varA.'>'.$valueA.')?'.$pathB.'$`',
+            ],
+            'optional pattern, with dir slash' => [
+                'path' => '/{'.$varA.'?}/'.$pathB,
+                'constraints' => [$varA => $valueA],
+                'expected' => '`^(?:/(?<'.$varA.'>'.$valueA.'))?/'.$pathB.'$`',
+            ],
+            'optional pattern, with dot' => [
+                'path' => $pathA.'.{'.$varA.'?}',
+                'constraints' => [$varA => $valueA],
+                'expected' => '`^'.$pathA.'(?:\.(?<'.$varA.'>'.$valueA.'))?$`',
+            ],
+            'multiple optional patterns' => [
+                'path' => '/{'.$varA.'?}/{'.$varB.'?}/{'.$varC.'?}/'.$pathB,
+                'constraints' => [$varA => $valueA],
+                'expected' => '`^(?:/(?<'.$varA.'>'.$valueA.'))?'
+                    .'(?:/(?<'.$varB.'>.+?))?(?:/(?<'.$varC.'>.+?))?/'.$pathB.'$`',
+            ],
+            'text patterns escaped' => [
+                'path' => $pathA.'`{'.$varA.'}`'.$pathB,
+                'constraints' => [],
+                'expected' => '`^'.$pathA.'\`(?<'.$varA.'>.+?)\`'.$pathB.'$`',
+            ],
+        ];
+    }
+
+    public function testGetPatternOptionalPatternSetsDefaultValue(): void
+    {
+        $key     = uniqid('a');
+        $default = uniqid();
+        $prefix  = uniqid();
+        $path    = $prefix.'/{'.$key.'?'.$default.'}';
+        $fixture = new Route([], $path, uniqid());
+
+        self::assertEquals('`^'.$prefix.'(?:/(?<'.$key.'>.+?))?$`', $fixture->getPattern());
+        self::assertEquals([$key => $default], $fixture->getParams());
     }
 }

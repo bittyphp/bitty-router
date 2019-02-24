@@ -90,7 +90,7 @@ $router->add(['GET', 'POST'], '/resource/path', function (ServerRequestInterface
 
 ### Resource Pattern Matching
 
-You can define patterns to create routes that automatically extract variables from the route path, e.g. getting a product's ID or the slug for a blog entry. Routes that contain patterns MUST specify the constraints to fulfill those patterns. Constraints are specified by passing in an additional array.
+You can define patterns to create routes that automatically extract variables from the route path, e.g. getting a product's ID or the slug for a blog entry.
 
 ```php
 <?php
@@ -111,6 +111,30 @@ $router->add(
     // Our callback can access the variable from the Request object.
     function (ServerRequestInterface $request) {
         return new Response('You requested product '.$request->getAttribute('id'));
+    }
+);
+```
+
+Routes that contain patterns can optionally specify the constraints to fulfill those patterns. Constraints are specified by passing in an additional array. For example, maybe you want to ensure a product ID only contains digits.
+
+```php
+<?php
+
+use Bitty\Http\Response;
+use Bitty\Router\Router;
+use Psr\Http\Message\ServerRequestInterface;
+
+$router = new Router(...);
+
+$router->add(
+    'GET',
+
+    // Define the variables.
+    '/products/{id}',
+
+    // Our callback can access the variable from the Request object.
+    function (ServerRequestInterface $request) {
+        return new Response('You requested product '.$request->getAttribute('id'));
     },
 
     // Define the constraints. In this case, only look for digits.
@@ -119,6 +143,45 @@ $router->add(
 ```
 
 The above example essentially combines the path and the constraints to create a regex pattern of `/products/(\d+)`. It will match on requests for `/products/123`, but will not match on `/products/ABC123`.
+
+#### Optional Route Patterns
+
+Sometimes parameters aren't necessary to fulfill the request and can default to a set value. You can specify a parameter as optional by adding a `?` after the variable name. Additionally, you can enter a value after the `?` to use as the default. If no value is given, it uses to `null`.
+
+```php
+<?php
+
+use Bitty\Http\Response;
+use Bitty\Router\Router;
+use Psr\Http\Message\ServerRequestInterface;
+
+$router = new Router(...);
+
+$router->add(
+    'GET',
+
+    // Match against multiple optional parameters.
+    '/blog/{year?2019}/{month?}/{day?}',
+
+    // Our callback.
+    function (ServerRequestInterface $request) {
+        $year = $request->getAttribute('year');
+        $month = $request->getAttribute('month');
+        $day = $request->getAttribute('day');
+
+        return new Response(...);
+    },
+
+    // Constraints.
+    [
+        'year' => '\d+',
+        'month' => '\d+',
+        'day' => '\d+',
+    ]
+);
+```
+
+The above example allows us to navigate to `/blog`, `/blog/2018`, `/blog/2014/10`, or `/blog/2007/07/17`. Notice that the `/` separators also become optional. Currently, only `.` and `/` are seen as separators.
 
 ### Multiple Callback Types
 

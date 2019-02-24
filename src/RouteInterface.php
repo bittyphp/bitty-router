@@ -64,7 +64,7 @@ interface RouteInterface
     /**
      * Gets the route parameters.
      *
-     * @return string[]
+     * @return array<string|null>
      */
     public function getParams(): array;
 }

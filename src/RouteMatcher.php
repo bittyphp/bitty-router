@@ -75,13 +75,13 @@ class RouteMatcher implements RouteMatcherInterface
     {
         $pattern = $route->getPattern();
         $matches = [];
-        if (!preg_match("`^$pattern$`", $path, $matches)) {
+        if (!preg_match($pattern, $path, $matches)) {
             return false;
         }
 
-        $params = [];
+        $params = $route->getParams();
         foreach ($matches as $key => $value) {
-            if (is_int($key)) {
+            if (is_int($key) || empty($value)) {
                 continue;
             }
 
