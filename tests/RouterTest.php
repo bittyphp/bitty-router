@@ -104,7 +104,7 @@ class RouterTest extends TestCase
         self::assertSame($route, $actual);
     }
 
-    public function testFind(): void
+    public function testMatch(): void
     {
         $route   = $this->createMock(RouteInterface::class);
         $request = $this->createMock(ServerRequestInterface::class);
@@ -114,7 +114,7 @@ class RouterTest extends TestCase
             ->with($request)
             ->willReturn($route);
 
-        $actual = $this->fixture->find($request);
+        $actual = $this->fixture->match($request);
 
         self::assertSame($route, $actual);
     }

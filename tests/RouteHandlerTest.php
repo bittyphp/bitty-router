@@ -57,7 +57,7 @@ class RouteHandlerTest extends TestCase
         $this->builder->method('build')->willReturn([$callback, null]);
 
         $this->router->expects(self::once())
-            ->method('find')
+            ->method('match')
             ->with($request)
             ->willReturn($route);
 
@@ -71,7 +71,7 @@ class RouteHandlerTest extends TestCase
         $callback = uniqid('callback');
         $route    = $this->createRoute($callback);
 
-        $this->router->method('find')->willReturn($route);
+        $this->router->method('match')->willReturn($route);
 
         $object = $this->createMock(InvokableStubInterface::class);
         $object->method('__invoke')->willReturn($response);
@@ -102,7 +102,7 @@ class RouteHandlerTest extends TestCase
         $object   = $this->createMock(InvokableStubInterface::class);
 
         $object->method('__invoke')->willReturn($response);
-        $this->router->method('find')->willReturn($route);
+        $this->router->method('match')->willReturn($route);
         $this->builder->method('build')->willReturn([$object, $method]);
 
         $request->expects(self::exactly(2))
@@ -126,7 +126,7 @@ class RouteHandlerTest extends TestCase
         $route    = $this->createRoute($callback, $params);
         $object   = $this->createMock(InvokableStubInterface::class);
 
-        $this->router->method('find')->willReturn($route);
+        $this->router->method('match')->willReturn($route);
         $this->builder->method('build')->willReturn([$object, $method]);
 
         $object->expects(self::once())
@@ -151,7 +151,7 @@ class RouteHandlerTest extends TestCase
         $object   = $this->createMock(InvokableStubInterface::class);
         $response = $this->createMock(ResponseInterface::class);
 
-        $this->router->method('find')->willReturn($route);
+        $this->router->method('match')->willReturn($route);
         $this->builder->method('build')->willReturn([$object, $method]);
         $object->method('__invoke')->willReturn($response);
 

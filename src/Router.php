@@ -84,7 +84,7 @@ class Router implements RouterInterface
     /**
      * {@inheritDoc}
      */
-    public function find(ServerRequestInterface $request): RouteInterface
+    public function match(ServerRequestInterface $request): RouteInterface
     {
         return $this->matcher->match($request);
     }

@@ -35,7 +35,7 @@ class RouteHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $route    = $this->router->find($request);
+        $route    = $this->router->match($request);
         $callback = $route->getCallback();
         $params   = $route->getParams();
 
