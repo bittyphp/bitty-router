@@ -3,7 +3,6 @@
 namespace Bitty\Router;
 
 use Bitty\Router\Exception\NotFoundException;
-use Bitty\Router\Route;
 use Bitty\Router\RouteCollectionInterface;
 use Bitty\Router\RouteInterface;
 
@@ -32,29 +31,16 @@ class RouteCollection implements RouteCollectionInterface
     /**
      * {@inheritDoc}
      */
-    public function add(
-        $methods,
-        string $path,
-        $callback,
-        array $constraints = [],
-        ?string $name = null
-    ): RouteInterface {
-        $route = new Route(
-            $methods,
-            $path,
-            $callback,
-            $constraints,
-            $name,
-            $this->routeCounter++
-        );
+    public function add(RouteInterface $route): void
+    {
+        $name = $route->getName();
 
-        if ($name === null) {
-            $name = $route->getIdentifier();
+        if (empty($name)) {
+            $name = '_route_'.$this->routeCounter;
         }
 
         $this->routes[$name] = $route;
-
-        return $route;
+        $this->routeCounter++;
     }
 
     /**

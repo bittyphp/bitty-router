@@ -17,21 +17,9 @@ interface RouteCollectionInterface
     /**
      * Adds a new route.
      *
-     * @param string[]|string $methods
-     * @param string $path
-     * @param callable|string|mixed $callback
-     * @param string[] $constraints
-     * @param string|null $name
-     *
-     * @return RouteInterface
+     * @param RouteInterface $route
      */
-    public function add(
-        $methods,
-        string $path,
-        $callback,
-        array $constraints = [],
-        ?string $name = null
-    ): RouteInterface;
+    public function add(RouteInterface $route): void;
 
     /**
      * Checks if a route exists.

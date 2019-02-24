@@ -54,16 +54,24 @@ class RouterTest extends TestCase
     {
         $methods     = [uniqid('method'), uniqid('method')];
         $path        = uniqid('path');
-        $callable    = function () {
-        };
+        $callable    = uniqid();
         $constraints = [uniqid('key') => uniqid('value')];
         $name        = uniqid('name');
 
-        $this->routes->expects(self::once())
+        $spy = self::once();
+        $this->routes->expects($spy)
             ->method('add')
-            ->with($methods, $path, $callable, $constraints, $name);
+            ->with(self::isInstanceOf(RouteInterface::class));
 
-        $this->fixture->add($methods, $path, $callable, $constraints, $name);
+        $actual = $this->fixture->add($methods, $path, $callable, $constraints, $name);
+
+        $route = $spy->getInvocations()[0]->getParameters()[0];
+        self::assertSame($route, $actual);
+        self::assertEquals(array_map('strtoupper', $methods), $actual->getMethods());
+        self::assertEquals($path, $actual->getPath());
+        self::assertEquals($callable, $actual->getCallback());
+        self::assertEquals($constraints, $actual->getConstraints());
+        self::assertEquals($name, $actual->getName());
     }
 
     public function testHas(): void

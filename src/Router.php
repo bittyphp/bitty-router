@@ -2,7 +2,9 @@
 
 namespace Bitty\Router;
 
+use Bitty\Router\Route;
 use Bitty\Router\RouteCollectionInterface;
+use Bitty\Router\RouteInterface;
 use Bitty\Router\RouteMatcherInterface;
 use Bitty\Router\RouterInterface;
 use Bitty\Router\UriGeneratorInterface;
@@ -50,7 +52,17 @@ class Router implements RouterInterface
         array $constraints = [],
         ?string $name = null
     ): RouteInterface {
-        return $this->routes->add($methods, $path, $callback, $constraints, $name);
+        $route = new Route(
+            $methods,
+            $path,
+            $callback,
+            $constraints,
+            $name
+        );
+
+        $this->routes->add($route);
+
+        return $route;
     }
 
     /**
