@@ -5,13 +5,6 @@ namespace Bitty\Router;
 interface RouteInterface
 {
     /**
-     * Gets the route identifier.
-     *
-     * @return string
-     */
-    public function getIdentifier(): string;
-
-    /**
      * Gets the route methods.
      *
      * @return string[]

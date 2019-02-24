@@ -15,15 +15,6 @@ class RouteTest extends TestCase
         self::assertInstanceOf(RouteInterface::class, $fixture);
     }
 
-    public function testGetIdentifier(): void
-    {
-        $fixture = new Route([], uniqid(), uniqid());
-
-        $actual = $fixture->getIdentifier();
-
-        self::assertEquals('route_0', $actual);
-    }
-
     public function testGetMethods(): void
     {
         $methodA = uniqid('a');

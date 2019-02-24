@@ -7,13 +7,6 @@ use Bitty\Router\RouteInterface;
 class Route implements RouteInterface
 {
     /**
-     * Route identifier.
-     *
-     * @var string
-     */
-    private $identifier = null;
-
-    /**
      * List of allowed request methods, e.g. GET, POST, etc.
      *
      * @var string[]
@@ -68,30 +61,19 @@ class Route implements RouteInterface
      * @param callable|string $callback
      * @param string[] $constraints
      * @param string|null $name
-     * @param int $identifier
      */
     public function __construct(
         $methods,
         string $path,
         $callback,
         array $constraints = [],
-        ?string $name = null,
-        int $identifier = 0
+        ?string $name = null
     ) {
         $this->setMethods($methods);
         $this->setPath($path);
         $this->setCallback($callback);
         $this->setConstraints($constraints);
         $this->setName($name);
-        $this->identifier = 'route_'.$identifier;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
     }
 
     /**
