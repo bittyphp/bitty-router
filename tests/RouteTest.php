@@ -31,16 +31,17 @@ class RouteTest extends TestCase
         $methodA = uniqid('a');
         $methodB = uniqid('b');
         $fixture = new Route([], uniqid(), uniqid());
-        $fixture->setMethods([$methodA, $methodB]);
 
+        $self   = $fixture->setMethods([$methodA, $methodB]);
         $actual = $fixture->getMethods();
 
+        self::assertSame($fixture, $self);
         self::assertEquals([strtoupper($methodA), strtoupper($methodB)], $actual);
     }
 
     public function testGetPath(): void
     {
-        $path    = uniqid();
+        $path    = uniqid('/');
         $fixture = new Route([], $path, uniqid());
 
         $actual = $fixture->getPath();
@@ -48,15 +49,37 @@ class RouteTest extends TestCase
         self::assertEquals($path, $actual);
     }
 
-    public function testSetPath(): void
+    /**
+     * @param string $path
+     * @param string $expected
+     *
+     * @dataProvider samplePaths
+     */
+    public function testSetPath(string $path, string $expected): void
     {
-        $path    = uniqid();
         $fixture = new Route([], uniqid(), uniqid());
-        $fixture->setPath($path);
 
+        $self   = $fixture->setPath($path);
         $actual = $fixture->getPath();
 
-        self::assertEquals($path, $actual);
+        self::assertSame($fixture, $self);
+        self::assertEquals($expected, $actual);
+    }
+
+    public function samplePaths(): array
+    {
+        $path = uniqid();
+
+        return [
+            'adds slash' => [
+                'path' => $path,
+                'expected' => '/'.$path,
+            ],
+            'removes extra slashs' => [
+                'path' => '/////'.$path,
+                'expected' => '/'.$path,
+            ],
+        ];
     }
 
     public function testGetCallbackWithCallable(): void
@@ -77,10 +100,11 @@ class RouteTest extends TestCase
         };
 
         $fixture = new Route([], uniqid(), uniqid());
-        $fixture->setCallback($callable);
 
+        $self   = $fixture->setCallback($callable);
         $actual = $fixture->getCallback();
 
+        self::assertSame($fixture, $self);
         self::assertSame($callable, $actual);
     }
 
@@ -100,10 +124,11 @@ class RouteTest extends TestCase
         $callable = uniqid();
 
         $fixture = new Route([], uniqid(), uniqid());
-        $fixture->setCallback($callable);
 
+        $self   = $fixture->setCallback($callable);
         $actual = $fixture->getCallback();
 
+        self::assertSame($fixture, $self);
         self::assertSame($callable, $actual);
     }
 
@@ -164,11 +189,70 @@ class RouteTest extends TestCase
         $constraints = [uniqid()];
 
         $fixture = new Route([], uniqid(), uniqid());
-        $fixture->setConstraints($constraints);
+
+        $self   = $fixture->setConstraints($constraints);
+        $actual = $fixture->getConstraints();
+
+        self::assertSame($fixture, $self);
+        self::assertEquals($constraints, $actual);
+    }
+
+    /**
+     * @param mixed[] $existing
+     * @param mixed[] $add
+     * @param mixed[] $expected
+     *
+     * @dataProvider sampleAddData
+     */
+    public function testAddConstraints(array $existing, array $add, array $expected): void
+    {
+        $fixture = new Route([], uniqid(), uniqid(), $existing);
+        $fixture->addConstraints($add);
 
         $actual = $fixture->getConstraints();
 
-        self::assertEquals($constraints, $actual);
+        self::assertEquals($expected, $actual);
+    }
+
+    public function sampleAddData(): array
+    {
+        $keyA   = uniqid('key');
+        $keyB   = uniqid('key');
+        $valueA = uniqid('value');
+        $valueB = uniqid('value');
+
+        return [
+            'no existing, no add' => [
+                'existing' => [],
+                'add' => [],
+                'expected' => [],
+            ],
+            'no existing, one add' => [
+                'existing' => [],
+                'add' => [$keyA => $valueA],
+                'expected' => [$keyA => $valueA],
+            ],
+            'no existing, multiple adds' => [
+                'existing' => [],
+                'add' => [$keyA => $valueA, $keyB => $valueB],
+                'expected' => [$keyA => $valueA, $keyB => $valueB],
+            ],
+            'one existing, one add' => [
+                'existing' => [$keyA => $valueA],
+                'add' => [$keyB => $valueB],
+                'expected' => [$keyA => $valueA, $keyB => $valueB],
+            ],
+            'one existing, one overwrite, one add' => [
+                'existing' => [$keyA => $valueA],
+                'add' => [$keyA => $valueB, $keyB => $valueA],
+                'expected' => [$keyA => $valueB, $keyB => $valueA],
+            ],
+            'multiple existing, no add' => [
+                'existing' => [$keyA => $valueA, $keyB => $valueB],
+                'add' => [],
+                'expected' => [$keyA => $valueA, $keyB => $valueB],
+            ],
+        ];
     }
 
     public function testGetName(): void
@@ -187,10 +271,11 @@ class RouteTest extends TestCase
         $name = uniqid();
 
         $fixture = new Route([], uniqid(), uniqid());
-        $fixture->setName($name);
 
+        $self   = $fixture->setName($name);
         $actual = $fixture->getName();
 
+        self::assertSame($fixture, $self);
         self::assertEquals($name, $actual);
     }
 
@@ -199,11 +284,31 @@ class RouteTest extends TestCase
         $params = [uniqid()];
 
         $fixture = new Route([], uniqid(), uniqid());
-        $fixture->setParams($params);
 
+        $self   = $fixture->setParams($params);
         $actual = $fixture->getParams();
 
+        self::assertSame($fixture, $self);
         self::assertEquals($params, $actual);
+    }
+
+    /**
+     * @param mixed[] $existing
+     * @param mixed[] $add
+     * @param mixed[] $expected
+     *
+     * @dataProvider sampleAddData
+     */
+    public function testAddParams(array $existing, array $add, array $expected): void
+    {
+        $fixture = new Route([], uniqid(), uniqid());
+        $fixture->setParams($existing);
+
+        $self   = $fixture->addParams($add);
+        $actual = $fixture->getParams();
+
+        self::assertSame($fixture, $self);
+        self::assertEquals($expected, $actual);
     }
 
     /**
@@ -230,8 +335,8 @@ class RouteTest extends TestCase
         $valueA = '\d{'.rand(1, 9).'}';
         $valueB = '\d{'.rand(1, 9).'}';
         $valueC = '\d{'.rand(1, 9).'}';
-        $pathA  = uniqid();
-        $pathB  = uniqid();
+        $pathA  = uniqid('/');
+        $pathB  = uniqid('/');
 
         return [
             'no patterns' => [
@@ -240,9 +345,9 @@ class RouteTest extends TestCase
                 'expected' => '`^'.$pathA.'$`',
             ],
             'one pattern, start' => [
-                'path' => '{'.$varA.'}/'.$pathA,
+                'path' => '/{'.$varA.'}/'.$pathA,
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^(?<'.$varA.'>'.$valueA.')/'.$pathA.'$`',
+                'expected' => '`^/(?<'.$varA.'>'.$valueA.')/'.$pathA.'$`',
             ],
             'one pattern, middle' => [
                 'path' => $pathA.'/{'.$varA.'}/'.$pathB,
@@ -301,7 +406,7 @@ class RouteTest extends TestCase
     {
         $key     = uniqid('a');
         $default = uniqid();
-        $prefix  = uniqid();
+        $prefix  = uniqid('/');
         $path    = $prefix.'/{'.$key.'?'.$default.'}';
         $fixture = new Route([], $path, uniqid());
 

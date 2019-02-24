@@ -77,13 +77,13 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route methods.
-     *
-     * @param string[]|string $methods List of request methods to allow.
+     * {@inheritDoc}
      */
-    public function setMethods($methods): void
+    public function setMethods($methods): RouteInterface
     {
         $this->methods = array_map('strtoupper', (array) $methods);
+
+        return $this;
     }
 
     /**
@@ -95,14 +95,14 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route path.
-     *
-     * @param string $path Route path.
+     * {@inheritDoc}
      */
-    public function setPath(string $path): void
+    public function setPath(string $path): RouteInterface
     {
-        $this->path = $path;
+        $this->path = '/'.ltrim($path, '/');
         $this->pattern = null;
+
+        return $this;
     }
 
     /**
@@ -114,18 +114,14 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route callback.
-     *
-     * @param callable|string $callback Callback to call.
-     *
-     * @throws \InvalidArgumentException
+     * {@inheritDoc}
      */
-    public function setCallback($callback): void
+    public function setCallback($callback): RouteInterface
     {
         if (is_callable($callback) || is_string($callback)) {
             $this->callback = $callback;
 
-            return;
+            return $this;
         }
 
         throw new \InvalidArgumentException(
@@ -145,14 +141,14 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route constraints.
-     *
-     * @param string[] $constraints List of constraints for route variables.
+     * {@inheritDoc}
      */
-    public function setConstraints(array $constraints): void
+    public function setConstraints(array $constraints): RouteInterface
     {
         $this->constraints = $constraints;
         $this->pattern = null;
+
+        return $this;
     }
 
     /**
@@ -161,6 +157,17 @@ class Route implements RouteInterface
     public function getConstraints(): array
     {
         return $this->constraints;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function addConstraints(array $constraints): RouteInterface
+    {
+        $this->constraints = array_merge($this->constraints, $constraints);
+        $this->pattern = null;
+
+        return $this;
     }
 
     /**
@@ -217,13 +224,13 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route name.
-     *
-     * @param string|null $name Route name.
+     * {@inheritDoc}
      */
-    public function setName($name): void
+    public function setName(?string $name): RouteInterface
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -235,13 +242,13 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route parameters.
-     *
-     * @param array<string|null> $params Parameters to pass to the route.
+     * {@inheritDoc}
      */
-    public function setParams(array $params): void
+    public function setParams(array $params): RouteInterface
     {
         $this->params = $params;
+
+        return $this;
     }
 
     /**
@@ -250,5 +257,15 @@ class Route implements RouteInterface
     public function getParams(): array
     {
         return $this->params;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function addParams(array $params): RouteInterface
+    {
+        $this->params = array_merge($this->params, $params);
+
+        return $this;
     }
 }

@@ -79,7 +79,7 @@ class RouteMatcher implements RouteMatcherInterface
             return false;
         }
 
-        $params = $route->getParams();
+        $params = [];
         foreach ($matches as $key => $value) {
             if (is_int($key) || empty($value)) {
                 continue;
@@ -88,9 +88,7 @@ class RouteMatcher implements RouteMatcherInterface
             $params[$key] = $value;
         }
 
-        if (method_exists($route, 'setParams')) {
-            $route->setParams($params);
-        }
+        $route->addParams($params);
 
         return true;
     }

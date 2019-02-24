@@ -53,7 +53,7 @@ class RouterTest extends TestCase
     public function testAdd(): void
     {
         $methods     = [uniqid('method'), uniqid('method')];
-        $path        = uniqid('path');
+        $path        = uniqid('/path');
         $callable    = uniqid();
         $constraints = [uniqid('key') => uniqid('value')];
         $name        = uniqid('name');
