@@ -322,9 +322,11 @@ class RouteTest extends TestCase
     {
         $fixture = new Route([], $path, uniqid(), $constraints);
 
-        $actual = $fixture->getPattern();
+        $actualA = $fixture->getPattern();
+        $actualB = $fixture->getPattern(); // this should be a cached copy
 
-        self::assertEquals($expected, $actual);
+        self::assertEquals($expected, $actualA);
+        self::assertEquals($expected, $actualB);
     }
 
     public function samplePatterns(): array
