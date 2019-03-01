@@ -2,6 +2,7 @@
 
 namespace Bitty\Router;
 
+use Bitty\Router\RouteCompiler;
 use Bitty\Router\RouteInterface;
 
 class Route implements RouteInterface
@@ -175,55 +176,12 @@ class Route implements RouteInterface
      */
     public function getPattern(): string
     {
-        if ($this->pattern !== null) {
-            return $this->pattern;
+        if ($this->pattern === null) {
+            $compiled = RouteCompiler::compile($this->path, $this->constraints, $this->params);
+            $this->pattern = $compiled['regex'];
+            $this->params = $compiled['params'];
+            $this->constraints = $compiled['constraints'];
         }
-
-        $deliminator = '`';
-        $separators = '/.';
-        $this->pattern = $deliminator.'^';
-
-        $pos = 0;
-        $matches = [];
-        preg_match_all(
-            $deliminator.'\{(\w+)(<.*?>)?(\?[^\}]*?)?\}'.$deliminator,
-            $this->path,
-            $matches,
-            PREG_SET_ORDER|PREG_OFFSET_CAPTURE
-        );
-
-        foreach ($matches as $match) {
-            $string = $match[0][0];
-            /** @var int $offset */
-            $offset = $match[0][1];
-            $name = $match[1][0];
-
-            if (isset($match[2]) && !empty($match[2][0])) {
-                $this->constraints[$name] = substr($match[2][0], 1, -1);
-            }
-
-            $regex = '(?<'.$name.'>'.($this->constraints[$name] ?? '.+?').')';
-            $previousText = substr($this->path, $pos, $offset - $pos);
-            $previousChar = substr($previousText, -1);
-            $pos = $offset + strlen($string);
-
-            if (isset($match[3])) {
-                $default = substr($match[3][0], 1);
-                $this->params[$name] = $default ?: null;
-                if (preg_match($deliminator.'['.$separators.']'.$deliminator, $previousChar)) {
-                    $previousText = substr($previousText, 0, -1);
-                    $regex = '(?:'.preg_quote($previousChar, $deliminator).$regex.')?';
-                } else {
-                    $regex .= '?';
-                }
-            }
-
-            $this->pattern .= preg_quote($previousText, $deliminator).$regex;
-        }
-
-        $remainingText = substr($this->path, $pos);
-        $this->pattern .= preg_quote($remainingText, $deliminator);
-        $this->pattern .= '$'.$deliminator;
 
         return $this->pattern;
     }
