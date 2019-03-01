@@ -401,6 +401,16 @@ class RouteTest extends TestCase
                 'constraints' => [],
                 'expected' => '`^'.$pathA.'\`(?<'.$varA.'>.+?)\`'.$pathB.'$`',
             ],
+            'with constraint, no default' => [
+                'path' => $pathA.'`{'.$varA.'<\d+>}`'.$pathB,
+                'constraints' => [],
+                'expected' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)\`'.$pathB.'$`',
+            ],
+            'with constraint, with default' => [
+                'path' => $pathA.'`{'.$varA.'<\d+>?'.rand().'}`'.$pathB,
+                'constraints' => [],
+                'expected' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)?\`'.$pathB.'$`',
+            ],
         ];
     }
 
@@ -414,5 +424,20 @@ class RouteTest extends TestCase
 
         self::assertEquals('`^'.$prefix.'(?:/(?<'.$key.'>.+?))?$`', $fixture->getPattern());
         self::assertEquals([$key => $default], $fixture->getParams());
+    }
+
+    public function testGetPatternSetsConstraints(): void
+    {
+        $keyA    = uniqid('a');
+        $keyB    = uniqid('a');
+        $value   = uniqid();
+        $default = uniqid();
+        $prefix  = uniqid('/');
+        $regex   = '[A-Za-z0-9]+';
+        $path    = $prefix.'/{'.$keyA.'<'.$regex.'>}';
+        $fixture = new Route([], $path, uniqid(), [$keyB => $value]);
+
+        self::assertEquals('`^'.$prefix.'/(?<'.$keyA.'>'.$regex.')$`', $fixture->getPattern());
+        self::assertEquals([$keyB => $value, $keyA => $regex], $fixture->getConstraints());
     }
 }
