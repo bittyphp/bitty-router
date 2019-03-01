@@ -32,13 +32,13 @@ class RouteCompiler
         $pos = 0;
         $matches = [];
         preg_match_all(
-            self::DELIMINATOR.'\{(\w+)(<.*?>)?(\?[^\}]*?)?\}'.self::DELIMINATOR,
+            '`\{(\w+)(<.*?>)?(\?[^\}]*?)?\}`',
             $path,
             $matches,
             PREG_SET_ORDER|PREG_OFFSET_CAPTURE
         );
 
-        $compiled = '';
+        $regex = '';
         foreach ($matches as $match) {
             $string = $match[0][0];
             /** @var int $offset */
@@ -47,14 +47,14 @@ class RouteCompiler
             $previousText = substr($path, $pos, $offset - $pos);
             $pos = $offset + strlen($string);
 
-            $compiled .= self::processMatch($match, $constraints, $params, $name, $previousText);
+            $regex .= self::processMatch($match, $constraints, $params, $name, $previousText);
         }
 
         $remainingText = substr($path, $pos);
-        $compiled .= preg_quote($remainingText, self::DELIMINATOR);
+        $regex .= preg_quote($remainingText, self::DELIMINATOR);
 
         return [
-            'regex' => self::DELIMINATOR.'^'.$compiled.'$'.self::DELIMINATOR,
+            'regex' => self::DELIMINATOR.'^'.$regex.'$'.self::DELIMINATOR,
             'constraints' => $constraints,
             'params' => $params,
         ];
