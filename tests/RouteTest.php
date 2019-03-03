@@ -346,7 +346,12 @@ class RouteTest extends TestCase
                 'constraints' => [],
                 'expected' => [
                     'regex' => '`^'.$pathA.'$`',
-                    'tokens' => [],
+                    'tokens' => [
+                        [
+                            'type' => 'text',
+                            'prefix' => $pathA,
+                        ],
+                    ],
                 ],
             ],
             'one pattern, start' => [
@@ -356,10 +361,19 @@ class RouteTest extends TestCase
                     'regex' => '`^/(?<'.$varA.'>'.$valueA.')/'.$pathA.'$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => '/',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => false,
                             'regex' => '(?<'.$varA.'>'.$valueA.')',
-                            'prefix' => '/',
+                            'prefix' => '',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => '/'.$pathA,
                         ],
                     ],
                 ],
@@ -371,10 +385,19 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')/'.$pathB.'$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA.'/',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => false,
                             'regex' => '(?<'.$varA.'>'.$valueA.')',
-                            'prefix' => $pathA.'/',
+                            'prefix' => '',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => '/'.$pathB,
                         ],
                     ],
                 ],
@@ -386,10 +409,15 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA.'/',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => false,
                             'regex' => '(?<'.$varA.'>'.$valueA.')',
-                            'prefix' => $pathA.'/',
+                            'prefix' => '',
                         ],
                     ],
                 ],
@@ -401,10 +429,15 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'(?<'.$varA.'>.+?)$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA,
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => false,
                             'regex' => '(?<'.$varA.'>.+?)',
-                            'prefix' => $pathA,
+                            'prefix' => '',
                         ],
                     ],
                 ],
@@ -420,22 +453,33 @@ class RouteTest extends TestCase
                         .'/(?<'.$varC.'>.+?)$`',
                     'tokens' => [
                         [
-                            'name' => $varA,
-                            'optional' => false,
-                            'regex' => '(?<'.$varA.'>'.$valueA.')',
+                            'type' => 'text',
                             'prefix' => $pathA.'/',
                         ],
                         [
+                            'type' => 'param',
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>'.$valueA.')',
+                            'prefix' => '',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varB,
                             'optional' => false,
                             'regex' => '(?<'.$varB.'>'.$valueB.')',
                             'prefix' => '',
                         ],
                         [
+                            'type' => 'text',
+                            'prefix' => '/',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varC,
                             'optional' => false,
                             'regex' => '(?<'.$varC.'>.+?)',
-                            'prefix' => '/',
+                            'prefix' => '',
                         ],
                     ],
                 ],
@@ -447,10 +491,19 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'(?<'.$varA.'>'.$valueA.')?'.$pathB.'$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA,
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => true,
                             'regex' => '(?<'.$varA.'>'.$valueA.')',
-                            'prefix' => $pathA,
+                            'prefix' => '',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => $pathB,
                         ],
                     ],
                 ],
@@ -462,10 +515,15 @@ class RouteTest extends TestCase
                     'regex' => '`^(?:/(?<'.$varA.'>'.$valueA.'))?/'.$pathB.'$`',
                     'tokens' => [
                         [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => true,
                             'regex' => '(?:/(?<'.$varA.'>'.$valueA.'))',
-                            'prefix' => '',
+                            'prefix' => '/',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => '/'.$pathB,
                         ],
                     ],
                 ],
@@ -477,10 +535,15 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'(?:\.(?<'.$varA.'>'.$valueA.'))?$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA,
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => true,
                             'regex' => '(?:\.(?<'.$varA.'>'.$valueA.'))',
-                            'prefix' => $pathA,
+                            'prefix' => '.',
                         ],
                     ],
                 ],
@@ -493,22 +556,29 @@ class RouteTest extends TestCase
                         .'(?:/(?<'.$varB.'>.+?))?(?:/(?<'.$varC.'>.+?))?/'.$pathB.'$`',
                     'tokens' => [
                         [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => true,
                             'regex' => '(?:/(?<'.$varA.'>'.$valueA.'))',
-                            'prefix' => '',
+                            'prefix' => '/',
                         ],
                         [
+                            'type' => 'param',
                             'name' => $varB,
                             'optional' => true,
                             'regex' => '(?:/(?<'.$varB.'>.+?))',
-                            'prefix' => '',
+                            'prefix' => '/',
                         ],
                         [
+                            'type' => 'param',
                             'name' => $varC,
                             'optional' => true,
                             'regex' => '(?:/(?<'.$varC.'>.+?))',
-                            'prefix' => '',
+                            'prefix' => '/',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => '/'.$pathB,
                         ],
                     ],
                 ],
@@ -520,10 +590,19 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'\`(?<'.$varA.'>.+?)\`'.$pathB.'$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA.'`',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => false,
                             'regex' => '(?<'.$varA.'>.+?)',
-                            'prefix' => $pathA.'\`',
+                            'prefix' => '',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => '`'.$pathB,
                         ],
                     ],
                 ],
@@ -535,10 +614,19 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)\`'.$pathB.'$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA.'`',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => false,
                             'regex' => '(?<'.$varA.'>\d+)',
-                            'prefix' => $pathA.'\`',
+                            'prefix' => '',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => '`'.$pathB,
                         ],
                     ],
                 ],
@@ -550,10 +638,19 @@ class RouteTest extends TestCase
                     'regex' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)?\`'.$pathB.'$`',
                     'tokens' => [
                         [
+                            'type' => 'text',
+                            'prefix' => $pathA.'`',
+                        ],
+                        [
+                            'type' => 'param',
                             'name' => $varA,
                             'optional' => true,
                             'regex' => '(?<'.$varA.'>\d+)',
-                            'prefix' => $pathA.'\`',
+                            'prefix' => '',
+                        ],
+                        [
+                            'type' => 'text',
+                            'prefix' => '`'.$pathB,
                         ],
                     ],
                 ],

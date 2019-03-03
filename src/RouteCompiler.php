@@ -49,12 +49,27 @@ class RouteCompiler
             $pos = $offset + strlen($string);
 
             $token = self::processMatch($match, $constraints, $params, $name, $previousText);
+            $regex .= preg_quote($token['previousText'], self::DELIMINATOR)
+                .$token['regex'].($token['optional'] ? '?' : '');
+
+            if (!empty($token['previousText'])) {
+                $tokens[] = [
+                    'type' => 'text',
+                    'prefix' => $token['previousText'],
+                ];
+            }
+            unset($token['previousText']);
             $tokens[] = $token;
-            $regex .= $token['prefix'].$token['regex'].($token['optional'] ? '?' : '');
         }
 
         $remainingText = substr($path, $pos);
-        $regex .= preg_quote($remainingText, self::DELIMINATOR);
+        if (!empty($remainingText)) {
+            $tokens[] = [
+                'type' => 'text',
+                'prefix' => $remainingText,
+            ];
+            $regex .= preg_quote($remainingText, self::DELIMINATOR);
+        }
 
         return [
             'regex' => self::DELIMINATOR.'^'.$regex.'$'.self::DELIMINATOR,
@@ -88,24 +103,29 @@ class RouteCompiler
 
         $regex = '(?<'.$name.'>'.($constraints[$name] ?? '.+?').')';
         $isOptional = false;
+        $prefix = '';
 
         if (isset($match[3])) {
             $isOptional = true;
             $default = substr($match[3][0], 1);
             $params[$name] = $default ?: null;
 
-            $previousChar = substr($previousText, -1);
-            if (preg_match('`['.self::SEPARATORS.']`', $previousChar)) {
+            $prefix = substr($previousText, -1);
+            if (preg_match('`['.self::SEPARATORS.']`', $prefix)) {
                 $previousText = substr($previousText, 0, -1);
-                $regex = '(?:'.preg_quote($previousChar, self::DELIMINATOR).$regex.')';
+                $regex = '(?:'.preg_quote($prefix, self::DELIMINATOR).$regex.')';
+            } else {
+                $prefix = '';
             }
         }
 
         return [
+            'type' => 'param',
             'name' => $name,
             'optional' => $isOptional,
             'regex' => $regex,
-            'prefix' => preg_quote($previousText, self::DELIMINATOR),
+            'prefix' => $prefix,
+            'previousText' => $previousText,
         ];
     }
 }
