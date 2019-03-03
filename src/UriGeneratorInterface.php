@@ -25,7 +25,7 @@ interface UriGeneratorInterface
     public const ABSOLUTE_PATH = 'absolute-path';
 
     /**
-     * Indicates to return an network URI (no scheme prefix).
+     * Indicates to return a network URI (no scheme prefix).
      *
      * For example, //www.example.com/some/path.html
      *
