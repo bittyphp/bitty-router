@@ -80,11 +80,11 @@ use Psr\Http\Message\ServerRequestInterface;
 $router = new Router(...);
 
 $router->add(['GET', 'POST'], '/resource/path', function (ServerRequestInterface $request) {
-    if ($request->getMethod() === 'GET') {
-        return new Response('You did a GET');
+    if ($request->getMethod() === 'POST') {
+        return new Response('You did a POST');
     }
 
-    return new Response('You did a POST');
+    return new Response('You did a GET');
 });
 ```
 
@@ -275,7 +275,11 @@ use Bitty\Router\Router;
 
 $router = new Router(...);
 
+// Set it directly.
 $router->add('GET', '/foo', ExampleController::class, [], 'foo_route');
+
+// Set it after.
+$router->add('GET', '/foo', ExampleController::class)->setName('foo_route');
 ```
 
 ## Checking For a Route
@@ -318,7 +322,7 @@ $route->setMethods(['GET', 'POST']);
 
 ### By Request
 
-You can use the `find()` method to fetch a route based on a request. This allows you to find both named or unnamed routes. Similar to `get()`, if the route doesn't exist a `Bitty\Router\Exception\NotFoundException` will be thrown. If it finds a route, the route object will be returned.
+You can use the `match()` method to fetch a route based on a request. This allows you to find both named or unnamed routes. Similar to `get()`, if the route doesn't exist a `Bitty\Router\Exception\NotFoundException` will be thrown. If it finds a route, the route object will be returned.
 
 ```php
 <?php
@@ -332,7 +336,7 @@ $router = new Router(...);
 $request = ...;
 
 // Find a matching route
-$route = $router->find($request);
+$route = $router->match($request);
 ```
 
 ## Generating a URI
