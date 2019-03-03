@@ -165,7 +165,7 @@ $router->add(
     // Our callback can access the variable from the Request object.
     function (ServerRequestInterface $request) {
         return new Response('You requested product '.$request->getAttribute('id'));
-    },
+    }
 );
 ```
 
