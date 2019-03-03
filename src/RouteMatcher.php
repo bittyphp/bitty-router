@@ -77,9 +77,9 @@ class RouteMatcher implements RouteMatcherInterface
      */
     private function isPathMatch(RouteInterface $route, string $path): bool
     {
-        $pattern = $route->getPattern();
+        $compiled = $route->compile();
         $matches = [];
-        if (!preg_match($pattern, $path, $matches)) {
+        if (!preg_match($compiled['regex'], $path, $matches)) {
             return false;
         }
 

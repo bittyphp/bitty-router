@@ -88,13 +88,6 @@ interface RouteInterface
     public function addConstraints(array $constraints): RouteInterface;
 
     /**
-     * Gets a matchable pattern that combines that path and constraints.
-     *
-     * @return string
-     */
-    public function getPattern(): string;
-
-    /**
      * Sets the route name.
      *
      * @param string|null $name Route name.
@@ -134,4 +127,13 @@ interface RouteInterface
      * @return RouteInterface
      */
     public function addParams(array $params): RouteInterface;
+
+    /**
+     * Gets an array of compiled route data.
+     *
+     * @return array
+     *
+     * @internal
+     */
+    public function compile(): array;
 }

@@ -36,13 +36,6 @@ class Route implements RouteInterface
     private $constraints = [];
 
     /**
-     * The URI pattern to match.
-     *
-     * @var string|null
-     */
-    private $pattern = null;
-
-    /**
      * Route name.
      *
      * @var string|null
@@ -55,6 +48,13 @@ class Route implements RouteInterface
      * @var array<string|null>
      */
     private $params = [];
+
+    /**
+     * The compiled route data.
+     *
+     * @var array|null
+     */
+    private $compiled = null;
 
     /**
      * @param string[]|string $methods
@@ -101,7 +101,7 @@ class Route implements RouteInterface
     public function setPath(string $path): RouteInterface
     {
         $this->path = '/'.ltrim($path, '/');
-        $this->pattern = null;
+        $this->compiled = null;
 
         return $this;
     }
@@ -147,7 +147,7 @@ class Route implements RouteInterface
     public function setConstraints(array $constraints): RouteInterface
     {
         $this->constraints = $constraints;
-        $this->pattern = null;
+        $this->compiled = null;
 
         return $this;
     }
@@ -166,24 +166,9 @@ class Route implements RouteInterface
     public function addConstraints(array $constraints): RouteInterface
     {
         $this->constraints = array_merge($this->constraints, $constraints);
-        $this->pattern = null;
+        $this->compiled = null;
 
         return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getPattern(): string
-    {
-        if ($this->pattern === null) {
-            $compiled = RouteCompiler::compile($this->path, $this->constraints, $this->params);
-            $this->pattern = $compiled['regex'];
-            $this->params = $compiled['params'];
-            $this->constraints = $compiled['constraints'];
-        }
-
-        return $this->pattern;
     }
 
     /**
@@ -230,5 +215,23 @@ class Route implements RouteInterface
         $this->params = array_merge($this->params, $params);
 
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function compile(): array
+    {
+        if ($this->compiled === null) {
+            $compiled = RouteCompiler::compile($this->path, $this->constraints, $this->params);
+            $this->compiled = [
+                'regex' => $compiled['regex'],
+                'tokens' => $compiled['tokens'],
+            ];
+            $this->params = $compiled['params'];
+            $this->constraints = $compiled['constraints'];
+        }
+
+        return $this->compiled;
     }
 }

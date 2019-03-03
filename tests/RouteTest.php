@@ -314,22 +314,22 @@ class RouteTest extends TestCase
     /**
      * @param string $path
      * @param array $constraints
-     * @param string $expected
+     * @param array $expected
      *
-     * @dataProvider samplePatterns
+     * @dataProvider sampleCompiled
      */
-    public function testGetPattern(string $path, array $constraints, string $expected): void
+    public function testCompile(string $path, array $constraints, array $expected): void
     {
         $fixture = new Route([], $path, uniqid(), $constraints);
 
-        $actualA = $fixture->getPattern();
-        $actualB = $fixture->getPattern(); // this should be a cached copy
+        $actualA = $fixture->compile();
+        $actualB = $fixture->compile(); // this should be a cached copy
 
         self::assertEquals($expected, $actualA);
         self::assertEquals($expected, $actualB);
     }
 
-    public function samplePatterns(): array
+    public function sampleCompiled(): array
     {
         $varA   = uniqid('a');
         $varB   = uniqid('bb');
@@ -344,27 +344,70 @@ class RouteTest extends TestCase
             'no patterns' => [
                 'path' => $pathA,
                 'constraints' => [],
-                'expected' => '`^'.$pathA.'$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'$`',
+                    'tokens' => [],
+                ],
             ],
             'one pattern, start' => [
                 'path' => '/{'.$varA.'}/'.$pathA,
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^/(?<'.$varA.'>'.$valueA.')/'.$pathA.'$`',
+                'expected' => [
+                    'regex' => '`^/(?<'.$varA.'>'.$valueA.')/'.$pathA.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>'.$valueA.')',
+                            'prefix' => '/',
+                        ],
+                    ],
+                ],
             ],
             'one pattern, middle' => [
                 'path' => $pathA.'/{'.$varA.'}/'.$pathB,
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')/'.$pathB.'$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')/'.$pathB.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>'.$valueA.')',
+                            'prefix' => $pathA.'/',
+                        ],
+                    ],
+                ],
             ],
             'one pattern, end' => [
                 'path' => $pathA.'/{'.$varA.'}',
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>'.$valueA.')',
+                            'prefix' => $pathA.'/',
+                        ],
+                    ],
+                ],
             ],
             'one pattern, no constraint' => [
                 'path' => $pathA.'{'.$varA.'}',
                 'constraints' => [],
-                'expected' => '`^'.$pathA.'(?<'.$varA.'>.+?)$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'(?<'.$varA.'>.+?)$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>.+?)',
+                            'prefix' => $pathA,
+                        ],
+                    ],
+                ],
             ],
             'multiple patterns' => [
                 'path' => $pathA.'/{'.$varA.'}{'.$varB.'}/{'.$varC.'}',
@@ -372,72 +415,180 @@ class RouteTest extends TestCase
                     $varA => $valueA,
                     $varB => $valueB,
                 ],
-                'expected' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')(?<'.$varB.'>'.$valueB.')'
-                    .'/(?<'.$varC.'>.+?)$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'/(?<'.$varA.'>'.$valueA.')(?<'.$varB.'>'.$valueB.')'
+                        .'/(?<'.$varC.'>.+?)$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>'.$valueA.')',
+                            'prefix' => $pathA.'/',
+                        ],
+                        [
+                            'name' => $varB,
+                            'optional' => false,
+                            'regex' => '(?<'.$varB.'>'.$valueB.')',
+                            'prefix' => '',
+                        ],
+                        [
+                            'name' => $varC,
+                            'optional' => false,
+                            'regex' => '(?<'.$varC.'>.+?)',
+                            'prefix' => '/',
+                        ],
+                    ],
+                ],
             ],
             'optional pattern' => [
                 'path' => $pathA.'{'.$varA.'?}'.$pathB,
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^'.$pathA.'(?<'.$varA.'>'.$valueA.')?'.$pathB.'$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'(?<'.$varA.'>'.$valueA.')?'.$pathB.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => true,
+                            'regex' => '(?<'.$varA.'>'.$valueA.')',
+                            'prefix' => $pathA,
+                        ],
+                    ],
+                ],
             ],
             'optional pattern, with dir slash' => [
                 'path' => '/{'.$varA.'?}/'.$pathB,
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^(?:/(?<'.$varA.'>'.$valueA.'))?/'.$pathB.'$`',
+                'expected' => [
+                    'regex' => '`^(?:/(?<'.$varA.'>'.$valueA.'))?/'.$pathB.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => true,
+                            'regex' => '(?:/(?<'.$varA.'>'.$valueA.'))',
+                            'prefix' => '',
+                        ],
+                    ],
+                ],
             ],
             'optional pattern, with dot' => [
                 'path' => $pathA.'.{'.$varA.'?}',
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^'.$pathA.'(?:\.(?<'.$varA.'>'.$valueA.'))?$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'(?:\.(?<'.$varA.'>'.$valueA.'))?$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => true,
+                            'regex' => '(?:\.(?<'.$varA.'>'.$valueA.'))',
+                            'prefix' => $pathA,
+                        ],
+                    ],
+                ],
             ],
             'multiple optional patterns' => [
                 'path' => '/{'.$varA.'?}/{'.$varB.'?}/{'.$varC.'?}/'.$pathB,
                 'constraints' => [$varA => $valueA],
-                'expected' => '`^(?:/(?<'.$varA.'>'.$valueA.'))?'
-                    .'(?:/(?<'.$varB.'>.+?))?(?:/(?<'.$varC.'>.+?))?/'.$pathB.'$`',
+                'expected' => [
+                    'regex' => '`^(?:/(?<'.$varA.'>'.$valueA.'))?'
+                        .'(?:/(?<'.$varB.'>.+?))?(?:/(?<'.$varC.'>.+?))?/'.$pathB.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => true,
+                            'regex' => '(?:/(?<'.$varA.'>'.$valueA.'))',
+                            'prefix' => '',
+                        ],
+                        [
+                            'name' => $varB,
+                            'optional' => true,
+                            'regex' => '(?:/(?<'.$varB.'>.+?))',
+                            'prefix' => '',
+                        ],
+                        [
+                            'name' => $varC,
+                            'optional' => true,
+                            'regex' => '(?:/(?<'.$varC.'>.+?))',
+                            'prefix' => '',
+                        ],
+                    ],
+                ],
             ],
             'text patterns escaped' => [
                 'path' => $pathA.'`{'.$varA.'}`'.$pathB,
                 'constraints' => [],
-                'expected' => '`^'.$pathA.'\`(?<'.$varA.'>.+?)\`'.$pathB.'$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'\`(?<'.$varA.'>.+?)\`'.$pathB.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>.+?)',
+                            'prefix' => $pathA.'\`',
+                        ],
+                    ],
+                ],
             ],
             'with constraint, no default' => [
                 'path' => $pathA.'`{'.$varA.'<\d+>}`'.$pathB,
                 'constraints' => [],
-                'expected' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)\`'.$pathB.'$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)\`'.$pathB.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => false,
+                            'regex' => '(?<'.$varA.'>\d+)',
+                            'prefix' => $pathA.'\`',
+                        ],
+                    ],
+                ],
             ],
             'with constraint, with default' => [
                 'path' => $pathA.'`{'.$varA.'<\d+>?'.rand().'}`'.$pathB,
                 'constraints' => [],
-                'expected' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)?\`'.$pathB.'$`',
+                'expected' => [
+                    'regex' => '`^'.$pathA.'\`(?<'.$varA.'>\d+)?\`'.$pathB.'$`',
+                    'tokens' => [
+                        [
+                            'name' => $varA,
+                            'optional' => true,
+                            'regex' => '(?<'.$varA.'>\d+)',
+                            'prefix' => $pathA.'\`',
+                        ],
+                    ],
+                ],
             ],
         ];
     }
 
-    public function testGetPatternOptionalPatternSetsDefaultValue(): void
+    public function testCompileSetsParams(): void
     {
         $key     = uniqid('a');
         $default = uniqid();
         $prefix  = uniqid('/');
         $path    = $prefix.'/{'.$key.'?'.$default.'}';
         $fixture = new Route([], $path, uniqid());
+        $fixture->compile();
 
-        self::assertEquals('`^'.$prefix.'(?:/(?<'.$key.'>.+?))?$`', $fixture->getPattern());
-        self::assertEquals([$key => $default], $fixture->getParams());
+        $actual = $fixture->getParams();
+
+        self::assertEquals([$key => $default], $actual);
     }
 
-    public function testGetPatternSetsConstraints(): void
+    public function testCompileSetsConstraints(): void
     {
         $keyA    = uniqid('a');
-        $keyB    = uniqid('a');
-        $value   = uniqid();
+        $keyB    = uniqid('b');
+        $value   = uniqid('value');
         $default = uniqid();
         $prefix  = uniqid('/');
         $regex   = '[A-Za-z0-9]+';
         $path    = $prefix.'/{'.$keyA.'<'.$regex.'>}';
         $fixture = new Route([], $path, uniqid(), [$keyB => $value]);
+        $fixture->compile();
 
-        self::assertEquals('`^'.$prefix.'/(?<'.$keyA.'>'.$regex.')$`', $fixture->getPattern());
-        self::assertEquals([$keyB => $value, $keyA => $regex], $fixture->getConstraints());
+        $actual = $fixture->getConstraints();
+
+        self::assertEquals([$keyB => $value, $keyA => $regex], $actual);
     }
 }
