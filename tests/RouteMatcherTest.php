@@ -107,6 +107,15 @@ class RouteMatcherTest extends TestCase
                 'expectedName' => $nameA,
                 'expectedParams' => [],
             ],
+            'HEAD equals GET' => [
+                'routes' => [
+                    ['GET', $pathA, $callback, [], $nameA],
+                ],
+                'path' => $pathA,
+                'method' => 'HEAD',
+                'expectedName' => $nameA,
+                'expectedParams' => [],
+            ],
             'multiple simple routes, same path' => [
                 'routes' => [
                     ['GET', $pathA, $callback, [], $nameA],

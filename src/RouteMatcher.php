@@ -28,7 +28,7 @@ class RouteMatcher implements RouteMatcherInterface
      */
     public function match(ServerRequestInterface $request): RouteInterface
     {
-        $method = $request->getMethod();
+        $method = strtoupper($request->getMethod());
         $path   = '/'.ltrim($request->getUri()->getPath(), '/');
 
         foreach ($this->routes->all() as $route) {
@@ -58,6 +58,10 @@ class RouteMatcher implements RouteMatcherInterface
         if ($methods === []) {
             // any method allowed
             return true;
+        }
+
+        if ($method === 'HEAD') {
+            $method = 'GET';
         }
 
         return in_array($method, $methods, true);
