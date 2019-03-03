@@ -2,17 +2,11 @@
 
 namespace Bitty\Router;
 
+use Bitty\Router\RouteCompiler;
 use Bitty\Router\RouteInterface;
 
 class Route implements RouteInterface
 {
-    /**
-     * Route identifier.
-     *
-     * @var string
-     */
-    private $identifier = null;
-
     /**
      * List of allowed request methods, e.g. GET, POST, etc.
      *
@@ -42,13 +36,6 @@ class Route implements RouteInterface
     private $constraints = [];
 
     /**
-     * The URI pattern to match.
-     *
-     * @var string|null
-     */
-    private $pattern = null;
-
-    /**
      * Route name.
      *
      * @var string|null
@@ -63,45 +50,41 @@ class Route implements RouteInterface
     private $params = [];
 
     /**
+     * The compiled route data.
+     *
+     * @var array|null
+     */
+    private $compiled = null;
+
+    /**
      * @param string[]|string $methods
      * @param string $path
      * @param callable|string $callback
      * @param string[] $constraints
      * @param string|null $name
-     * @param int $identifier
      */
     public function __construct(
         $methods,
         string $path,
         $callback,
         array $constraints = [],
-        ?string $name = null,
-        int $identifier = 0
+        ?string $name = null
     ) {
         $this->setMethods($methods);
         $this->setPath($path);
         $this->setCallback($callback);
         $this->setConstraints($constraints);
         $this->setName($name);
-        $this->identifier = 'route_'.$identifier;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * Sets the route methods.
-     *
-     * @param string[]|string $methods List of request methods to allow.
-     */
-    public function setMethods($methods): void
+    public function setMethods($methods): RouteInterface
     {
         $this->methods = array_map('strtoupper', (array) $methods);
+
+        return $this;
     }
 
     /**
@@ -113,14 +96,14 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route path.
-     *
-     * @param string $path Route path.
+     * {@inheritDoc}
      */
-    public function setPath(string $path): void
+    public function setPath(string $path): RouteInterface
     {
-        $this->path = $path;
-        $this->pattern = null;
+        $this->path = '/'.ltrim($path, '/');
+        $this->compiled = null;
+
+        return $this;
     }
 
     /**
@@ -132,18 +115,14 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route callback.
-     *
-     * @param callable|string $callback Callback to call.
-     *
-     * @throws \InvalidArgumentException
+     * {@inheritDoc}
      */
-    public function setCallback($callback): void
+    public function setCallback($callback): RouteInterface
     {
         if (is_callable($callback) || is_string($callback)) {
             $this->callback = $callback;
 
-            return;
+            return $this;
         }
 
         throw new \InvalidArgumentException(
@@ -163,14 +142,14 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route constraints.
-     *
-     * @param string[] $constraints List of constraints for route variables.
+     * {@inheritDoc}
      */
-    public function setConstraints(array $constraints): void
+    public function setConstraints(array $constraints): RouteInterface
     {
         $this->constraints = $constraints;
-        $this->pattern = null;
+        $this->compiled = null;
+
+        return $this;
     }
 
     /**
@@ -184,64 +163,22 @@ class Route implements RouteInterface
     /**
      * {@inheritDoc}
      */
-    public function getPattern(): string
+    public function addConstraints(array $constraints): RouteInterface
     {
-        if ($this->pattern !== null) {
-            return $this->pattern;
-        }
+        $this->constraints = array_merge($this->constraints, $constraints);
+        $this->compiled = null;
 
-        $deliminator = '`';
-        $separators = '/.';
-        $this->pattern = $deliminator.'^';
-
-        $pos = 0;
-        $matches = [];
-        preg_match_all(
-            $deliminator.'\{(\w+)(\?[^\}]*?)?\}'.$deliminator,
-            $this->path,
-            $matches,
-            PREG_SET_ORDER|PREG_OFFSET_CAPTURE
-        );
-
-        foreach ($matches as $match) {
-            $string = $match[0][0];
-            /** @var int $offset */
-            $offset = $match[0][1];
-            $name = $match[1][0];
-            $regex = '(?<'.$name.'>'.($this->constraints[$name] ?? '.+?').')';
-            $previousText = substr($this->path, $pos, $offset - $pos);
-            $previousChar = substr($previousText, -1);
-            $pos = $offset + strlen($string);
-
-            if (isset($match[2])) {
-                $default = substr($match[2][0], 1);
-                $this->params[$name] = $default ?: null;
-                if (preg_match($deliminator.'['.$separators.']'.$deliminator, $previousChar)) {
-                    $previousText = substr($previousText, 0, -1);
-                    $regex = '(?:'.preg_quote($previousChar, $deliminator).$regex.')?';
-                } else {
-                    $regex .= '?';
-                }
-            }
-
-            $this->pattern .= preg_quote($previousText, $deliminator).$regex;
-        }
-
-        $remainingText = substr($this->path, $pos);
-        $this->pattern .= preg_quote($remainingText, $deliminator);
-        $this->pattern .= '$'.$deliminator;
-
-        return $this->pattern;
+        return $this;
     }
 
     /**
-     * Sets the route name.
-     *
-     * @param string|null $name Route name.
+     * {@inheritDoc}
      */
-    public function setName($name): void
+    public function setName(?string $name): RouteInterface
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -253,13 +190,13 @@ class Route implements RouteInterface
     }
 
     /**
-     * Sets the route parameters.
-     *
-     * @param array<string|null> $params Parameters to pass to the route.
+     * {@inheritDoc}
      */
-    public function setParams(array $params): void
+    public function setParams(array $params): RouteInterface
     {
         $this->params = $params;
+
+        return $this;
     }
 
     /**
@@ -268,5 +205,33 @@ class Route implements RouteInterface
     public function getParams(): array
     {
         return $this->params;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function addParams(array $params): RouteInterface
+    {
+        $this->params = array_merge($this->params, $params);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function compile(): array
+    {
+        if ($this->compiled === null) {
+            $compiled = RouteCompiler::compile($this->path, $this->constraints, $this->params);
+            $this->compiled = [
+                'regex' => $compiled['regex'],
+                'tokens' => $compiled['tokens'],
+            ];
+            $this->params = $compiled['params'];
+            $this->constraints = $compiled['constraints'];
+        }
+
+        return $this->compiled;
     }
 }

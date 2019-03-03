@@ -3,8 +3,8 @@
 namespace Bitty\Tests\Router;
 
 use Bitty\Router\Exception\UriGeneratorException;
+use Bitty\Router\Route;
 use Bitty\Router\RouteCollectionInterface;
-use Bitty\Router\RouteInterface;
 use Bitty\Router\UriGenerator;
 use Bitty\Router\UriGeneratorInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -39,7 +39,7 @@ class UriGeneratorTest extends TestCase
     public function testGenerateGetsRoute(): void
     {
         $name  = uniqid();
-        $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => '']);
+        $route = new Route([], uniqid(), uniqid());
 
         $this->routes->expects(self::once())
             ->method('get')
@@ -67,7 +67,7 @@ class UriGeneratorTest extends TestCase
         string $type,
         string $expected
     ): void {
-        $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $path]);
+        $route = new Route([], $path, uniqid());
         $this->routes->method('get')->willReturn($route);
 
         $fixture = new UriGenerator($this->routes, $domain);
@@ -83,7 +83,7 @@ class UriGeneratorTest extends TestCase
         $pathB  = uniqid('path');
         $paramA = rand(); // non-string
         $paramB = uniqid('param');
-        $domain = uniqid('domain');
+        $domain = uniqid('scheme://');
 
         return [
             'no params' => [
@@ -140,7 +140,7 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => '/'.$domain.'/'.$pathB,
+                'expected' => $domain.'/'.$pathB,
             ],
             'path with leading slash' => [
                 'path' => $pathA,
@@ -148,7 +148,7 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => '/'.$domain.$pathA,
+                'expected' => $domain.$pathA,
             ],
             'no slashes' => [
                 'path' => $pathB,
@@ -156,7 +156,63 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => '/'.$domain.'/'.$pathB,
+                'expected' => $domain.'/'.$pathB,
+            ],
+            'network uri' => [
+                'path' => $pathA,
+                'domain' => 'scheme://'.$name,
+                'name' => $name,
+                'params' => [],
+                'type' => UriGeneratorInterface::NETWORK_URI,
+                'expected' => '//'.$name.$pathA,
+            ],
+            'trailing text' => [
+                'path' => $pathA.'/{paramA}/'.$pathB,
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramA' => $paramA],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'/'.$paramA.'/'.$pathB,
+            ],
+            'optional param' => [
+                'path' => $pathA.'/{paramA?}',
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramB' => $paramB],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'?paramB='.$paramB,
+            ],
+            'optional param in the middle' => [
+                'path' => $pathA.'/{paramA?}/'.$pathB,
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramB' => $paramB],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'/'.$pathB.'?paramB='.$paramB,
+            ],
+            'multiple optional params, no values' => [
+                'path' => $pathA.'/{paramA?}/{paramB?}',
+                'domain' => '',
+                'name' => $name,
+                'params' => [],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA,
+            ],
+            'multiple optional params, one value' => [
+                'path' => $pathA.'/{paramA?}/{paramB?}',
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramA' => $paramA],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'/'.$paramA,
+            ],
+            'optional param with default value' => [
+                'path' => $pathA.'/{paramA?'.rand().'}',
+                'domain' => '',
+                'name' => $name,
+                'params' => ['paramB' => $paramB],
+                'type' => UriGeneratorInterface::ABSOLUTE_PATH,
+                'expected' => $pathA.'?paramB='.$paramB,
             ],
         ];
     }
@@ -164,7 +220,7 @@ class UriGeneratorTest extends TestCase
     public function testGenerateThrowsException(): void
     {
         $path  = uniqid('path').'/{param}';
-        $route = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $path]);
+        $route = new Route([], $path, uniqid());
         $this->routes->method('get')->willReturn($route);
 
         $this->expectException(UriGeneratorException::class);

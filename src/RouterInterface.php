@@ -48,15 +48,15 @@ interface RouterInterface
     public function get(string $name): RouteInterface;
 
     /**
-     * Finds a route for the given request.
+     * Matches a route for the given request.
      *
      * @param ServerRequestInterface $request
      *
      * @return RouteInterface
      *
-     * @throws NotFoundException When unable to find a route.
+     * @throws NotFoundException When unable to match a route.
      */
-    public function find(ServerRequestInterface $request): RouteInterface;
+    public function match(ServerRequestInterface $request): RouteInterface;
 
     /**
      * Generates a URI for a named route.

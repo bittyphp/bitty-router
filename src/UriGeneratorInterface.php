@@ -25,6 +25,15 @@ interface UriGeneratorInterface
     public const ABSOLUTE_PATH = 'absolute-path';
 
     /**
+     * Indicates to return a network URI (no scheme prefix).
+     *
+     * For example, //www.example.com/some/path.html
+     *
+     * @var string
+     */
+    public const NETWORK_URI = 'network-uri';
+
+    /**
      * Generates a URI for the given named route.
      *
      * @param string $name

@@ -107,6 +107,15 @@ class RouteMatcherTest extends TestCase
                 'expectedName' => $nameA,
                 'expectedParams' => [],
             ],
+            'HEAD equals GET' => [
+                'routes' => [
+                    ['GET', $pathA, $callback, [], $nameA],
+                ],
+                'path' => $pathA,
+                'method' => 'HEAD',
+                'expectedName' => $nameA,
+                'expectedParams' => [],
+            ],
             'multiple simple routes, same path' => [
                 'routes' => [
                     ['GET', $pathA, $callback, [], $nameA],
@@ -187,7 +196,7 @@ class RouteMatcherTest extends TestCase
         $callback,
         array $constraints,
         $name
-    ) {
+    ): Route {
         return new Route($methods, $path, $callback, $constraints, $name);
     }
 
@@ -199,7 +208,7 @@ class RouteMatcherTest extends TestCase
      *
      * @return ServerRequestInterface
      */
-    private function createRequest($method = 'GET', $path = '/')
+    private function createRequest($method = 'GET', $path = '/'): ServerRequestInterface
     {
         $uri = $this->createConfiguredMock(UriInterface::class, ['getPath' => $path]);
 

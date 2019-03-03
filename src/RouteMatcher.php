@@ -28,7 +28,7 @@ class RouteMatcher implements RouteMatcherInterface
      */
     public function match(ServerRequestInterface $request): RouteInterface
     {
-        $method = $request->getMethod();
+        $method = strtoupper($request->getMethod());
         $path   = '/'.ltrim($request->getUri()->getPath(), '/');
 
         foreach ($this->routes->all() as $route) {
@@ -60,6 +60,10 @@ class RouteMatcher implements RouteMatcherInterface
             return true;
         }
 
+        if ($method === 'HEAD') {
+            $method = 'GET';
+        }
+
         return in_array($method, $methods, true);
     }
 
@@ -73,13 +77,13 @@ class RouteMatcher implements RouteMatcherInterface
      */
     private function isPathMatch(RouteInterface $route, string $path): bool
     {
-        $pattern = $route->getPattern();
+        $compiled = $route->compile();
         $matches = [];
-        if (!preg_match($pattern, $path, $matches)) {
+        if (!preg_match($compiled['regex'], $path, $matches)) {
             return false;
         }
 
-        $params = $route->getParams();
+        $params = [];
         foreach ($matches as $key => $value) {
             if (is_int($key) || empty($value)) {
                 continue;
@@ -88,9 +92,7 @@ class RouteMatcher implements RouteMatcherInterface
             $params[$key] = $value;
         }
 
-        if (method_exists($route, 'setParams')) {
-            $route->setParams($params);
-        }
+        $route->addParams($params);
 
         return true;
     }

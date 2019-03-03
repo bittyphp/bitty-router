@@ -27,91 +27,83 @@ class RouteCollectionTest extends TestCase
         self::assertInstanceOf(RouteCollectionInterface::class, $this->fixture);
     }
 
-    public function testAdd(): void
+    public function testAddWithName(): void
     {
-        $methods     = ['get', 'pOsT'];
-        $path        = uniqid();
-        $constraints = [uniqid()];
-        $name        = uniqid();
-        $callback    = function () {
-        };
+        $name  = uniqid('name');
+        $route = $this->createConfiguredMock(RouteInterface::class, ['getName' => $name]);
 
-        $this->fixture->add($methods, $path, $callback, $constraints, $name);
+        $this->fixture->add($route);
 
         $actual = $this->fixture->get($name);
 
-        self::assertInstanceOf(RouteInterface::class, $actual);
-        self::assertEquals(['GET', 'POST'], $actual->getMethods());
-        self::assertEquals($path, $actual->getPath());
-        self::assertEquals($callback, $actual->getCallback());
-        self::assertEquals($constraints, $actual->getConstraints());
-        self::assertEquals($name, $actual->getName());
-        self::assertEquals('route_0', $actual->getIdentifier());
+        self::assertSame($route, $actual);
     }
 
-    public function testAddWithStringCallback(): void
+    public function testAddWithoutName(): void
     {
-        $callback = uniqid();
+        $route = $this->createMock(RouteInterface::class);
 
-        $this->fixture->add(uniqid(), uniqid(), $callback);
+        $this->fixture->add($route);
 
-        $actual = $this->fixture->get('route_0');
+        $actual = $this->fixture->get('_route_0');
 
-        self::assertEquals($callback, $actual->getCallback());
-    }
-
-    public function testAddWithoutNameUsesIdentifier(): void
-    {
-        $this->fixture->add(uniqid(), uniqid(), uniqid());
-
-        $actual = $this->fixture->get('route_0');
-
-        self::assertInstanceOf(RouteInterface::class, $actual);
-        self::assertNull($actual->getName());
-        self::assertEquals('route_0', $actual->getIdentifier());
+        self::assertSame($route, $actual);
     }
 
     public function testMultipleAddsIncrementsIdentifier(): void
     {
-        $nameA = uniqid();
-        $nameB = uniqid();
+        $routeA = $this->createMock(RouteInterface::class);
+        $routeB = $this->createMock(RouteInterface::class);
 
-        $this->fixture->add(uniqid(), uniqid(), uniqid(), [], $nameA);
-        $this->fixture->add(uniqid(), uniqid(), uniqid(), [], $nameB);
+        $this->fixture->add($routeA);
+        $this->fixture->add($routeB);
 
-        $actualA = $this->fixture->get($nameA);
-        $actualB = $this->fixture->get($nameB);
+        $actualA = $this->fixture->get('_route_0');
+        $actualB = $this->fixture->get('_route_1');
 
-        self::assertEquals('route_0', $actualA->getIdentifier());
-        self::assertEquals('route_1', $actualB->getIdentifier());
+        self::assertSame($routeA, $actualA);
+        self::assertSame($routeB, $actualB);
     }
 
-    public function testAddInvalidCallbackThrowsException(): void
+    public function testAddCollection(): void
     {
-        $message = 'Callback must be a callable or string; NULL given.';
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage($message);
+        $nameA  = uniqid('name');
+        $nameB  = uniqid('name');
+        $routeA = $this->createConfiguredMock(RouteInterface::class, ['getName' => $nameA]);
+        $routeB = $this->createConfiguredMock(RouteInterface::class, ['getName' => $nameB]);
 
-        $this->fixture->add(uniqid(), uniqid(), null);
+        $collection = new RouteCollection();
+        $collection->add($routeA);
+        $collection->add($routeB);
+
+        $this->fixture->addCollection($collection);
+
+        $actual = $this->fixture->all();
+
+        self::assertEquals([$nameA => $routeA, $nameB => $routeB], $actual);
     }
 
     public function testAll(): void
     {
-        $name = uniqid('name');
+        $nameA  = uniqid('name');
+        $nameB  = uniqid('name');
+        $routeA = $this->createConfiguredMock(RouteInterface::class, ['getName' => $nameA]);
+        $routeB = $this->createConfiguredMock(RouteInterface::class, ['getName' => $nameB]);
 
-        $this->fixture->add(uniqid(), uniqid(), uniqid(), [], $name);
+        $this->fixture->add($routeA);
+        $this->fixture->add($routeB);
 
         $actual = $this->fixture->all();
 
-        self::assertEquals([$name], array_keys($actual));
+        self::assertEquals([$nameA, $nameB], array_keys($actual));
     }
 
     public function testHasTrue(): void
     {
-        $name = uniqid('name');
+        $name  = uniqid('name');
+        $route = $this->createConfiguredMock(RouteInterface::class, ['getName' => $name]);
 
-        $this->fixture->add(uniqid(), uniqid(), uniqid(), [], $name);
-
+        $this->fixture->add($route);
         $actual = $this->fixture->has($name);
 
         self::assertTrue($actual);
@@ -137,9 +129,10 @@ class RouteCollectionTest extends TestCase
 
     public function testRemoveExistingRoute(): void
     {
-        $name = uniqid('name');
+        $name  = uniqid('name');
+        $route = $this->createConfiguredMock(RouteInterface::class, ['getName' => $name]);
 
-        $this->fixture->add(uniqid(), uniqid(), uniqid(), [], $name);
+        $this->fixture->add($route);
         $this->fixture->remove($name);
 
         $actual = $this->fixture->has($name);
@@ -156,5 +149,120 @@ class RouteCollectionTest extends TestCase
         $actual = $this->fixture->has($name);
 
         self::assertFalse($actual);
+    }
+
+    public function testSetMethods(): void
+    {
+        $methods = [uniqid()];
+        $routeA  = $this->createMock(RouteInterface::class);
+        $routeB  = $this->createMock(RouteInterface::class);
+
+        $this->fixture->add($routeA);
+        $this->fixture->add($routeB);
+
+        $routeA->expects(self::once())
+            ->method('setMethods')
+            ->with($methods);
+
+        $routeB->expects(self::once())
+            ->method('setMethods')
+            ->with($methods);
+
+        $this->fixture->setMethods($methods);
+    }
+
+    public function testAddPrefix(): void
+    {
+        $prefix = uniqid();
+        $pathA  = uniqid();
+        $pathB  = uniqid();
+        $routeA = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $pathA]);
+        $routeB = $this->createConfiguredMock(RouteInterface::class, ['getPath' => $pathB]);
+
+        $this->fixture->add($routeA);
+        $this->fixture->add($routeB);
+
+        $routeA->expects(self::once())
+            ->method('setPath')
+            ->with($prefix.$pathA);
+
+        $routeB->expects(self::once())
+            ->method('setPath')
+            ->with($prefix.$pathB);
+
+        $this->fixture->addPrefix($prefix);
+    }
+
+    public function testAddNamePrefix(): void
+    {
+        $prefix = uniqid();
+        $nameA  = uniqid();
+        $nameB  = uniqid();
+        $routeA = $this->createConfiguredMock(RouteInterface::class, ['getName' => $nameA]);
+        $routeB = $this->createConfiguredMock(RouteInterface::class, ['getName' => null]);
+        $routeC = $this->createConfiguredMock(RouteInterface::class, ['getName' => $nameB]);
+
+        $this->fixture->add($routeA);
+        $this->fixture->add($routeB);
+        $this->fixture->add($routeC);
+
+        $routeA->expects(self::once())
+            ->method('setName')
+            ->with($prefix.$nameA);
+
+        $routeC->expects(self::once())
+            ->method('setName')
+            ->with($prefix.$nameB);
+
+        $this->fixture->addNamePrefix($prefix);
+
+        $actual = $this->fixture->all();
+
+        $expected = [
+            $prefix.$nameA => $routeA,
+            $prefix.'_route_1' => $routeB,
+            $prefix.$nameB => $routeC,
+        ];
+        self::assertEquals($expected, $actual);
+    }
+
+    public function testAddConstraints(): void
+    {
+        $constraints = [uniqid()];
+        $routeA      = $this->createMock(RouteInterface::class);
+        $routeB      = $this->createMock(RouteInterface::class);
+
+        $this->fixture->add($routeA);
+        $this->fixture->add($routeB);
+
+        $routeA->expects(self::once())
+            ->method('addConstraints')
+            ->with($constraints);
+
+        $routeB->expects(self::once())
+            ->method('addConstraints')
+            ->with($constraints);
+
+        $this->fixture->addConstraints($constraints);
+    }
+
+    public function testAddParams(): void
+    {
+        $params = [uniqid()];
+        $routeA = $this->createMock(RouteInterface::class);
+        $routeB = $this->createMock(RouteInterface::class);
+
+        $this->fixture->add($routeA);
+        $this->fixture->add($routeB);
+
+        $routeA->expects(self::once())
+            ->method('addParams')
+            ->with($params);
+
+        $routeB->expects(self::once())
+            ->method('addParams')
+            ->with($params);
+
+        $this->fixture->addParams($params);
     }
 }
