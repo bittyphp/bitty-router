@@ -43,6 +43,9 @@ class UriGenerator implements UriGeneratorInterface
 
         if ($type === self::ABSOLUTE_URI) {
             $uri = new Uri($this->domain.'/'.ltrim($path, '/'));
+        } elseif ($type === self::NETWORK_URI) {
+            $uri = new Uri($this->domain.'/'.ltrim($path, '/'));
+            $uri = $uri->withScheme('');
         } else {
             $uri = new Uri($path);
         }
@@ -53,7 +56,7 @@ class UriGenerator implements UriGeneratorInterface
                 .'='.urlencode(urldecode($value));
         }
 
-        return $uri->withQuery(implode('&', $query));
+        return strval($uri->withQuery(implode('&', $query)));
     }
 
     /**

@@ -83,7 +83,7 @@ class UriGeneratorTest extends TestCase
         $pathB  = uniqid('path');
         $paramA = rand(); // non-string
         $paramB = uniqid('param');
-        $domain = uniqid('domain');
+        $domain = uniqid('scheme://');
 
         return [
             'no params' => [
@@ -140,7 +140,7 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => '/'.$domain.'/'.$pathB,
+                'expected' => $domain.'/'.$pathB,
             ],
             'path with leading slash' => [
                 'path' => $pathA,
@@ -148,7 +148,7 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => '/'.$domain.$pathA,
+                'expected' => $domain.$pathA,
             ],
             'no slashes' => [
                 'path' => $pathB,
@@ -156,7 +156,15 @@ class UriGeneratorTest extends TestCase
                 'name' => $name,
                 'params' => [],
                 'type' => UriGeneratorInterface::ABSOLUTE_URI,
-                'expected' => '/'.$domain.'/'.$pathB,
+                'expected' => $domain.'/'.$pathB,
+            ],
+            'network uri' => [
+                'path' => $pathA,
+                'domain' => 'scheme://'.$name,
+                'name' => $name,
+                'params' => [],
+                'type' => UriGeneratorInterface::NETWORK_URI,
+                'expected' => '//'.$name.$pathA,
             ],
             'trailing text' => [
                 'path' => $pathA.'/{paramA}/'.$pathB,
